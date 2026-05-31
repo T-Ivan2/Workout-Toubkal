@@ -6,7 +6,7 @@ App PWA installabile su iPhone e Android. Funziona completamente offline.
 
 ---
 
-#1 📲 Come installare sul telefono
+## 📲 Come installare sul telefono
 
 ### iPhone — usa SAFARI (non Chrome)
 1. Apri https://t-ivan2.github.io/Workout-Toubkal/ in **Safari**
@@ -21,7 +21,7 @@ App PWA installabile su iPhone e Android. Funziona completamente offline.
 
 ---
 
-#2 💾 Backup automatico
+## 💾 Backup automatico
 
 Ogni **domenica alle 23:00** appare un banner arancione che ricorda di scaricare il backup JSON.
 Salva il file su iCloud o Google Drive.
@@ -30,6 +30,6 @@ Per ripristinare: tab **Dati** → **Importa** → carica il JSON.
 
 ---
 
-#3 ⚠️ Dati
+## ⚠️ Dati
 
 I dati sono salvati localmente sul dispositivo. Non cancellare la cache del browser senza aver prima esportato i dati dalla tab Dati.
