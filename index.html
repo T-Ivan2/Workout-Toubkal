@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Workout">
 <meta name="theme-color" content="#0f1117">
+<meta name="description" content="Tracker allenamenti per la preparazione al Monte Toubkal">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Workout Tracker</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
@@ -202,9 +205,66 @@ textarea { resize: vertical; min-height: 70px; }
 .tpl-actions { display:flex; gap:6px; margin-top:10px; }
 .tpl-ex-chip { display:inline-block; font-size:11px; background:var(--bg3); border:1px solid var(--border2); border-radius:20px; padding:2px 8px; margin:2px 2px 0 0; color:var(--muted); }
 .tag-tpl { background: rgba(167,139,250,0.15); color: #a78bfa; }
+
+/* Install banner */
+#install-banner {
+  display: none; position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px; z-index: 300;
+  background: var(--accent); color: #fff;
+  padding: 12px 16px; font-size: 13px;
+  flex-direction: column; gap: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+}
+#install-banner.show { display: flex; }
+#install-banner strong { font-size: 14px; }
+.install-banner-btns { display: flex; gap: 8px; }
+.install-banner-btns button {
+  flex: 1; padding: 8px; border-radius: 8px; border: none;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+}
+.ibtn-yes { background: #fff; color: var(--accent); }
+.ibtn-no  { background: rgba(255,255,255,.2); color: #fff; }
+
+/* Backup banner */
+#backup-banner {
+  display: none; position: fixed; bottom: calc(var(--nav-h) + 12px); left: 50%;
+  transform: translateX(-50%) translateY(0);
+  width: calc(100% - 32px); max-width: 448px; z-index: 300;
+  background: var(--bg2); border: 1px solid var(--amber);
+  border-radius: var(--radius); padding: 14px 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.5);
+}
+#backup-banner.show { display: block; }
+.backup-banner-title { font-size: 14px; font-weight: 600; color: var(--amber); margin-bottom: 4px; }
+.backup-banner-sub { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
+.backup-banner-btns { display: flex; gap: 8px; }
 </style>
 </head>
 <body>
+
+<!-- INSTALL BANNER (Android Chrome) -->
+<div id="install-banner">
+  <strong>📲 Installa l'app sul telefono</strong>
+  <div style="font-size:12px;opacity:.9">Accesso rapido, funziona offline, nessun browser aperto</div>
+  <div class="install-banner-btns">
+    <button class="ibtn-yes" onclick="doInstall()">Installa</button>
+    <button class="ibtn-no" onclick="dismissInstall()">Non ora</button>
+  </div>
+</div>
+
+<!-- BACKUP BANNER (domenica 23:00) -->
+<div id="backup-banner">
+  <div class="backup-banner-title">💾 Backup settimanale</div>
+  <div class="backup-banner-sub">Sono le 23:00 di domenica — scarica una copia dei tuoi dati per tenerli al sicuro.</div>
+  <div class="backup-banner-btns">
+    <button class="btn btn-ghost btn-sm" onclick="dismissBackup()" style="flex:1">Dopo</button>
+    <button class="btn btn-sm" style="flex:2;background:var(--amber);color:#000;font-weight:600" onclick="doBackup()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Scarica backup JSON
+    </button>
+  </div>
+</div>
+
 <div id="app">
 
 <!-- HOME -->
@@ -482,40 +542,6 @@ textarea { resize: vertical; min-height: 70px; }
       Una volta installata funziona completamente offline.
     </div>
   </div>
-
-  <div class="sec-label">Importa lista esercizi</div>
-  <div class="card">
-    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Carica un file JSON con esercizi personalizzati (per gruppo muscolare). Gli esercizi già presenti non vengono duplicati.</div>
-    <label for="imp-ex-file" class="btn btn-ghost" style="display:flex;align-items:center;gap:6px;justify-content:center;cursor:pointer">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Carica esercizi JSON
-    </label>
-    <input type="file" id="imp-ex-file" accept=".json" style="display:none" onchange="importExercises(event)">
-    <div style="font-size:11px;color:var(--hint);margin-top:8px">
-      Scarica il <a id="ex-template-link" href="#" onclick="downloadExTemplate(); return false;" style="color:var(--accent)">template JSON di esempio</a> per vedere il formato corretto.
-    </div>
-  </div>
-
-  <div class="sec-label">Aggiornamento app</div>
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div>
-        <div style="font-size:14px;font-weight:500">Versione installata</div>
-        <div style="font-size:12px;color:var(--muted)" id="app-version-label">Controllo in corso…</div>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="checkForUpdate()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Controlla
-      </button>
-    </div>
-    <div id="update-status" style="font-size:13px;color:var(--muted)">Tocca "Controlla" per verificare se è disponibile un aggiornamento da GitHub.</div>
-    <div id="update-btn-area" style="margin-top:10px;display:none">
-      <button class="btn btn-primary btn-block" onclick="applyUpdate()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Scarica e installa aggiornamento
-      </button>
-    </div>
-  </div>
 </div>
 
 <!-- NAV -->
@@ -575,7 +601,7 @@ textarea { resize: vertical; min-height: 70px; }
     </div>
     <div id="sets-container"></div>
     <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px">
-      <button class="btn btn-ghost" onclick="resetAddExSheet(); closeSheet('sh-add-ex')">Annulla</button>
+      <button class="btn btn-ghost" onclick="closeSheet('sh-add-ex')">Annulla</button>
       <button class="btn btn-primary" onclick="confirmEx()">Aggiungi</button>
     </div>
   </div>
@@ -869,25 +895,11 @@ function confirmEx() {
   const ex = D.exercises.find(e=>e.id===exId);
   const n = parseInt(document.getElementById('sh-sets-n').value)||3;
   const sets = Array.from({length:n},(_,i)=>({weight:document.getElementById('sw-'+i)?.value||'',reps:document.getElementById('sr-'+i)?.value||''}));
-  const sheet = document.getElementById('sh-add-ex');
-  const editIdx = sheet.dataset.editIdx !== undefined && sheet.dataset.editIdx !== '' ? parseInt(sheet.dataset.editIdx) : -1;
-  if (editIdx >= 0) {
-    logExs[editIdx] = {id:exId, name:ex.name, sets};
-  } else {
-    const idx = logExs.findIndex(e=>e.id===exId);
-    if (idx>=0) logExs[idx] = {id:exId,name:ex.name,sets};
-    else logExs.push({id:exId,name:ex.name,sets});
-  }
-  resetAddExSheet();
+  const idx = logExs.findIndex(e=>e.id===exId);
+  if (idx>=0) logExs[idx] = {id:exId,name:ex.name,sets};
+  else logExs.push({id:exId,name:ex.name,sets});
   renderLogExs();
   closeSheet('sh-add-ex');
-}
-
-function resetAddExSheet() {
-  const sheet = document.getElementById('sh-add-ex');
-  delete sheet.dataset.editIdx;
-  sheet.querySelector('h3').textContent = 'Aggiungi esercizio';
-  sheet.querySelector('.btn-primary').textContent = 'Aggiungi';
 }
 
 function renderLogExs() {
@@ -897,49 +909,15 @@ function renderLogExs() {
     <div class="card card-sm" style="margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <span style="font-size:14px;font-weight:500">${ex.name}</span>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost btn-sm" onclick="editEx(${i})">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Modifica
-          </button>
-          <button class="btn btn-danger btn-sm" onclick="removeEx(${i})">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-          </button>
-        </div>
+        <button class="btn btn-danger btn-sm" onclick="removeEx(${i})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
       </div>
       ${ex.sets.map((s,j)=>`<div style="font-size:12px;color:var(--muted);padding:2px 0">Serie ${j+1}: <span class="mono">${s.weight||'—'} ${s.weight?'kg':''} × ${s.reps||'—'}</span></div>`).join('')}
     </div>`).join('');
 }
 
-function removeEx(i) {
-  if (!confirm(`Eliminare l'esercizio "${logExs[i].name}"?`)) return;
-  logExs.splice(i,1); renderLogExs();
-}
-
-function editEx(i) {
-  const ex = logExs[i];
-  const sel = document.getElementById('sh-ex-sel');
-  sel.innerHTML = '<option value="">— Seleziona —</option>' + D.exercises.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
-  sel.value = ex.id;
-  document.getElementById('sh-sets-n').value = ex.sets.length;
-  document.getElementById('sh-add-ex').dataset.editIdx = i;
-  document.querySelector('#sh-add-ex h3').textContent = 'Modifica esercizio';
-  document.querySelector('#sh-add-ex .btn-primary').textContent = 'Salva modifiche';
-  // Build set inputs pre-filled with current values
-  let html = '';
-  ex.sets.forEach((s,idx)=>{
-    html += `<div class="set-grid">
-      <span class="set-num">${idx+1}</span>
-      <input type="number" id="sw-${idx}" placeholder="kg" step="0.5" value="${s.weight||''}">
-      <input type="number" id="sr-${idx}" placeholder="rip" value="${s.reps||''}">
-      <button class="copy-btn" onclick="copyDown(${idx})" title="Copia verso il basso">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-    </div>`;
-  });
-  document.getElementById('sets-container').innerHTML = html;
-  openSheet('sh-add-ex');
-}
+function removeEx(i) { logExs.splice(i,1); renderLogExs(); }
 
 function saveWorkout() {
   const type = document.getElementById('log-type').value;
@@ -1048,9 +1026,8 @@ function showDetail(id) {
 }
 
 function deleteW(id) {
-  if (!confirm('Eliminare questo allenamento? L\'operazione non può essere annullata.')) return;
   D.workouts = D.workouts.filter(w=>w.id!==id);
-  save(); updateHome(); renderHistory(); renderExList(); toast('Allenamento eliminato');
+  save(); updateHome(); renderHistory(); renderExList(); toast('Eliminato');
 }
 
 // ---- EXERCISES ----
@@ -1224,10 +1201,7 @@ function renderTplExBuild() {
     </div>`).join('');
 }
 
-function removeTplEx(i) {
-  if (!confirm(`Rimuovere "${tplExs[i].name}" dalla scheda?`)) return;
-  tplExs.splice(i,1); renderTplExBuild();
-}
+function removeTplEx(i) { tplExs.splice(i,1); renderTplExBuild(); }
 
 function openAddExToTpl() {
   const sel = document.getElementById('tpl-ex-sel');
@@ -1483,136 +1457,6 @@ function clearData() {
   }
 }
 
-// ---- IN-APP UPDATE (GitHub Pages) ----
-const GH_RAW = 'https://raw.githubusercontent.com/T-Ivan2/Workout-Toubkal/main/index.html';
-const GH_COMMITS = 'https://api.github.com/repos/T-Ivan2/Workout-Toubkal/commits?path=index.html&per_page=1';
-const APP_VERSION_KEY = 'app_commit_sha';
-
-let latestSha = null;
-
-async function checkForUpdate() {
-  const statusEl = document.getElementById('update-status');
-  const versionEl = document.getElementById('app-version-label');
-  const btnArea = document.getElementById('update-btn-area');
-  statusEl.textContent = 'Connessione a GitHub in corso…';
-  btnArea.style.display = 'none';
-  try {
-    const res = await fetch(GH_COMMITS, {cache: 'no-store'});
-    if (!res.ok) throw new Error('GitHub non raggiungibile');
-    const commits = await res.json();
-    const remoteSha = commits[0]?.sha?.slice(0, 7) || '?';
-    latestSha = commits[0]?.sha;
-    const localSha = localStorage.getItem(APP_VERSION_KEY) || 'prima installazione';
-    const remoteDate = commits[0]?.commit?.committer?.date
-      ? new Date(commits[0].commit.committer.date).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})
-      : '';
-    versionEl.textContent = `Versione locale: ${localSha.slice(0,7)}`;
-    if (localSha === latestSha) {
-      statusEl.innerHTML = `<span style="color:var(--green)">✓ Sei alla versione più recente</span> (${remoteSha}, ${remoteDate})`;
-    } else {
-      statusEl.innerHTML = `<span style="color:var(--amber)">⬆ Aggiornamento disponibile</span> — versione remota: ${remoteSha} del ${remoteDate}`;
-      btnArea.style.display = 'block';
-    }
-  } catch(err) {
-    statusEl.innerHTML = `<span style="color:var(--red, #f87171)">Impossibile contattare GitHub.</span> Verifica la connessione internet.`;
-  }
-}
-
-async function applyUpdate() {
-  const statusEl = document.getElementById('update-status');
-  const btnArea = document.getElementById('update-btn-area');
-  statusEl.textContent = 'Download aggiornamento in corso…';
-  btnArea.style.display = 'none';
-  try {
-    const res = await fetch(GH_RAW, {cache: 'no-store'});
-    if (!res.ok) throw new Error('Download fallito');
-    const html = await res.text();
-    // Save the new HTML as a downloadable file so the user replaces the installed version
-    const blob = new Blob([html], {type: 'text/html'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'index.html';
-    a.click(); URL.revokeObjectURL(url);
-    if (latestSha) localStorage.setItem(APP_VERSION_KEY, latestSha);
-    statusEl.innerHTML = `<span style="color:var(--green)">✓ File scaricato!</span> Sostituisci il vecchio <strong>index.html</strong> su GitHub con questo file appena scaricato, poi ricarica l'app.`;
-    toast('Aggiornamento scaricato!');
-  } catch(err) {
-    statusEl.innerHTML = `<span style="color:var(--red,#f87171)">Download fallito.</span> Riprova più tardi.`;
-    btnArea.style.display = 'block';
-  }
-}
-
-// ---- IMPORT ESERCIZI JSON ----
-function importExercises(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const parsed = JSON.parse(ev.target.result);
-      // Supporta due formati: array piatto [{name,cat,unit}] o oggetto {gruppoMuscolare: [{name,unit}]}
-      let toImport = [];
-      if (Array.isArray(parsed)) {
-        toImport = parsed;
-      } else if (typeof parsed === 'object') {
-        // formato raggruppato: { "gambe": [{name:"Squat",unit:"kg"}, ...], ... }
-        Object.entries(parsed).forEach(([cat, exs]) => {
-          if (Array.isArray(exs)) exs.forEach(ex => toImport.push({...ex, cat}));
-        });
-      }
-      // Valida e pulisci
-      const valid = toImport.filter(ex => ex.name && typeof ex.name === 'string');
-      if (!valid.length) { toast('Nessun esercizio valido nel file'); return; }
-      let added = 0;
-      valid.forEach(ex => {
-        const name = ex.name.trim();
-        const cat = ex.cat || ex.category || 'full';
-        const unit = ex.unit === 'bw' ? 'bw' : 'kg';
-        if (!D.exercises.find(e => e.name.toLowerCase() === name.toLowerCase())) {
-          D.exercises.push({id:'e'+Date.now()+Math.random().toString(36).slice(2,6), name, cat, unit});
-          added++;
-        }
-      });
-      save(); renderDatiExList(); renderExList();
-      toast(`${added} esercizi aggiunti (${valid.length - added} già presenti)`);
-    } catch(err) { toast('File JSON non valido'); }
-    e.target.value = '';
-  };
-  reader.readAsText(file);
-}
-
-function downloadExTemplate() {
-  const template = {
-    "gambe": [
-      {"name": "Squat con bilanciere", "unit": "kg"},
-      {"name": "Stacco da terra", "unit": "kg"},
-      {"name": "Pistol squat", "unit": "bw"}
-    ],
-    "schiena": [
-      {"name": "Trazioni", "unit": "bw"},
-      {"name": "Rematori manubri", "unit": "kg"}
-    ],
-    "petto": [
-      {"name": "Panca piana", "unit": "kg"}
-    ],
-    "spalle": [
-      {"name": "Military press", "unit": "kg"}
-    ],
-    "core": [
-      {"name": "Plank laterale", "unit": "bw"}
-    ],
-    "full": [
-      {"name": "Burpees", "unit": "bw"}
-    ]
-  };
-  const note = "// Formato supportato: oggetto con categorie come chiavi, array di esercizi come valori.\n// Categorie valide: gambe, schiena, petto, spalle, core, full, cardio, bicipiti, tricipiti\n// unit: 'kg' per esercizi con peso, 'bw' per corpo libero\n// Rimuovi questa riga di commento prima di importare — il JSON non supporta commenti.\n\n";
-  const blob = new Blob([JSON.stringify(template, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'esercizi_template.json';
-  a.click(); URL.revokeObjectURL(url);
-  toast('Template scaricato!');
-}
-
 // ---- UTILS ----
 function fmtDate(d) {
   return new Date(d+'T12:00:00').toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
@@ -1627,11 +1471,97 @@ updateHome();
 document.querySelectorAll('.sheet-overlay').forEach(el=>{
   el.addEventListener('click', e=>{
     if(e.target===el) {
-      if (el.id==='sh-add-ex') resetAddExSheet();
       el.classList.remove('open');
+      if (el.id==='sh-add-ex') delete el.dataset.editIdx;
     }
   });
 });
+
+// ---- PWA: SERVICE WORKER ----
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registrato:', reg.scope))
+      .catch(err => console.log('SW errore:', err));
+  });
+}
+
+// ---- PWA: INSTALL PROMPT (Android Chrome) ----
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show banner only if not already installed and not dismissed recently
+  const dismissed = localStorage.getItem('install_dismissed');
+  const dismissedAgo = dismissed ? (Date.now() - parseInt(dismissed)) : Infinity;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (!isStandalone && dismissedAgo > 7 * 24 * 3600 * 1000) {
+    document.getElementById('install-banner').classList.add('show');
+  }
+});
+
+function doInstall() {
+  document.getElementById('install-banner').classList.remove('show');
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') toast('App installata! 🎉');
+      deferredPrompt = null;
+    });
+  }
+}
+
+function dismissInstall() {
+  document.getElementById('install-banner').classList.remove('show');
+  localStorage.setItem('install_dismissed', Date.now().toString());
+}
+
+// ---- BACKUP AUTOMATICO DOMENICA 23:00 ----
+function doBackup() {
+  const blob = new Blob([JSON.stringify({
+    exported: new Date().toISOString(),
+    version: 'backup-domenica',
+    count: D.workouts.length,
+    data: D
+  }, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = `workout_backup_${dateStr}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  localStorage.setItem('last_backup', Date.now().toString());
+  dismissBackup();
+  toast('Backup scaricato! ✓');
+}
+
+function dismissBackup() {
+  document.getElementById('backup-banner').classList.remove('show');
+  localStorage.setItem('backup_dismissed_week', getWeekKey());
+}
+
+function getWeekKey() {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const week = Math.ceil(((now - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
+  return `${now.getFullYear()}-W${week}`;
+}
+
+function checkBackupReminder() {
+  const now = new Date();
+  const isSunday = now.getDay() === 0;
+  const isEvening = now.getHours() === 23;
+  const thisWeek = getWeekKey();
+  const alreadyDismissed = localStorage.getItem('backup_dismissed_week') === thisWeek;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (isSunday && isEvening && !alreadyDismissed && D.workouts.length > 0) {
+    document.getElementById('backup-banner').classList.add('show');
+  }
+}
+
+// Check on load and every 30 minutes
+checkBackupReminder();
+setInterval(checkBackupReminder, 30 * 60 * 1000);
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
