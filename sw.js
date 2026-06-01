@@ -1,61 +1,68 @@
-const CACHE_NAME = 'workout-toubkal-v1';
-const ASSETS = [
-  '/Workout-Toubkal/',
-  '/Workout-Toubkal/index.html',
-  'https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'
-];
+# 🏋 Workout Tracker — Preparazione Toubkal
 
-// Install: cache everything
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      // Cache local assets reliably; external ones best-effort
-      return cache.addAll(['./index.html']).then(() => {
-        return Promise.allSettled(ASSETS.slice(2).map(url => cache.add(url)));
-      });
-    })
-  );
-  self.skipWaiting();
-});
+**Link dell'app:** https://t-ivan2.github.io/Workout-Toubkal/
 
-// Activate: delete old caches
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
-});
+App PWA installabile su iPhone e Android. Funziona completamente offline.
 
-// Fetch: cache-first for local, network-first for external
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
-  const isLocal = url.origin === self.location.origin;
+---
 
-  if (isLocal) {
-    // Cache first for local files
-    e.respondWith(
-      caches.match(e.request).then(cached => {
-        if (cached) return cached;
-        return fetch(e.request).then(res => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
-          return res;
-        });
-      })
-    );
-  } else {
-    // Network first, fall back to cache for external resources
-    e.respondWith(
-      fetch(e.request)
-        .then(res => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
-          return res;
-        })
-        .catch(() => caches.match(e.request))
-    );
-  }
-});
+## 🚀 Come pubblicare su GitHub Pages (una volta sola)
+
+### 1. Crea il repository
+- Vai su [github.com](https://github.com) e accedi con l'account **T-Ivan2**
+- Clicca **+** in alto a destra → **New repository**
+- **Repository name:** `Workout-Toubkal` (esatto, rispetta maiuscole)
+- Lascia **Public** ✓
+- Clicca **Create repository**
+
+### 2. Carica i file
+- Nel repository appena creato clicca **"uploading an existing file"**
+- Trascina questi file e la cartella `icons` nell'area di upload:
+  - `index.html`
+  - `manifest.json`
+  - `sw.js`
+  - cartella `icons/` (con le 3 immagini dentro)
+- Scrivi "Prima versione" nel campo messaggio
+- Clicca **Commit changes**
+
+### 3. Attiva GitHub Pages
+- Vai su **Settings** (tab in alto nel repository)
+- Clicca **Pages** nel menu a sinistra
+- Sotto "Branch" seleziona **main** → cartella **/ (root)**
+- Clicca **Save**
+
+### 4. Aspetta 2-3 minuti
+Il tuo link sarà:
+```
+https://t-ivan2.github.io/Workout-Toubkal/
+```
+
+---
+
+## 📲 Come installare sul telefono
+
+### iPhone — usa SAFARI (non Chrome)
+1. Apri https://t-ivan2.github.io/Workout-Toubkal/ in **Safari**
+2. Tocca l'icona **condividi** (quadrato con la freccia)
+3. Tocca **"Aggiungi a schermata Home"**
+4. Tocca **Aggiungi**
+
+### Android — usa Chrome
+1. Apri il link in **Chrome**
+2. Apparirà un banner in basso → tocca **Installa**
+3. Oppure: menu ⋮ → "Aggiungi a schermata Home"
+
+---
+
+## 💾 Backup automatico
+
+Ogni **domenica alle 23:00** appare un banner arancione che ricorda di scaricare il backup JSON.
+Salva il file su iCloud o Google Drive.
+
+Per ripristinare: tab **Dati** → **Importa** → carica il JSON.
+
+---
+
+## ⚠️ Dati
+
+I dati sono salvati localmente sul dispositivo. Non cancellare la cache del browser senza aver prima esportato i dati dalla tab Dati.
