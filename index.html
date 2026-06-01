@@ -259,6 +259,27 @@ textarea { resize: vertical; min-height: 70px; }
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
     Registra allenamento
   </button>
+
+  <!-- INSTALL CARD — visibile solo se non già installata -->
+  <div id="install-card" style="display:none;margin-top:12px">
+    <div class="card" style="border-color:var(--accent);background:var(--accent-bg)">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:28px;line-height:1">📲</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600;margin-bottom:2px">Installa come app</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5" id="install-card-sub">Accesso rapido dalla schermata home, funziona offline</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px">
+        <button class="btn btn-ghost btn-sm" onclick="dismissInstallCard()">Non ora</button>
+        <button class="btn btn-primary btn-sm" id="install-card-btn" onclick="handleInstall()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Installa app
+        </button>
+      </div>
+    </div>
+  </div>
+  </button>
 </div>
 
 <!-- LOG -->
@@ -691,6 +712,47 @@ textarea { resize: vertical; min-height: 70px; }
       <button class="btn btn-ghost" onclick="closeSheet('sh-tpl-start')">Annulla</button>
       <button class="btn btn-primary" id="sh-tpl-start-btn">Inizia allenamento</button>
     </div>
+  </div>
+</div>
+
+<!-- SHEET: INSTALL INSTRUCTIONS (iOS fallback) -->
+<div class="sheet-overlay" id="sh-install">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 style="margin-bottom:4px">Installa l'app</h3>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Segui i passaggi per il tuo dispositivo</div>
+
+    <div style="background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <span style="font-size:18px">🤖</span> Android (Chrome)
+      </div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8">
+        1. Tocca i <strong style="color:var(--text)">tre puntini ⋮</strong> in alto a destra<br>
+        2. Tocca <strong style="color:var(--text)">"Installa app"</strong><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;oppure<br>
+        2. Tocca <strong style="color:var(--text)">"Aggiungi a schermata Home"</strong><br>
+        3. Conferma con <strong style="color:var(--text)">Installa</strong>
+      </div>
+    </div>
+
+    <div style="background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <span style="font-size:18px">🍎</span> iPhone (Safari)
+      </div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8">
+        1. Apri il link in <strong style="color:var(--text)">Safari</strong> (non Chrome)<br>
+        2. Tocca l'icona <strong style="color:var(--text)">condividi</strong> (quadrato con freccia)<br>
+        3. Tocca <strong style="color:var(--text)">"Aggiungi a schermata Home"</strong><br>
+        4. Tocca <strong style="color:var(--text)">Aggiungi</strong>
+      </div>
+    </div>
+
+    <div style="background:var(--accent-bg);border:1px solid rgba(79,142,247,.2);border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.6">
+      🔗 Link da copiare:<br>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--accent);word-break:break-all">https://t-ivan2.github.io/Workout-Toubkal/</span>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="closeSheet('sh-install')">Ho capito</button>
   </div>
 </div>
 
@@ -1632,6 +1694,107 @@ document.querySelectorAll('.sheet-overlay').forEach(el=>{
     }
   });
 });
+
+// ---- PWA: SERVICE WORKER ----
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ---- PWA: INSTALL LOGIC ----
+let deferredPrompt = null;
+const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const INSTALL_DISMISSED_KEY = 'install_dismissed_until';
+
+function showInstallCard(mode) {
+  // mode: 'prompt' (Chrome can auto-install) | 'manual' (show instructions)
+  if (IS_STANDALONE) return; // already installed
+  const dismissed = parseInt(localStorage.getItem(INSTALL_DISMISSED_KEY) || '0');
+  if (Date.now() < dismissed) return; // dismissed recently
+  const card = document.getElementById('install-card');
+  const btn = document.getElementById('install-card-btn');
+  const sub = document.getElementById('install-card-sub');
+  if (mode === 'prompt') {
+    btn.textContent = 'Installa app';
+    sub.textContent = 'Tocca per aggiungere alla schermata Home e usarla offline';
+  } else {
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Come si installa';
+    sub.textContent = 'Istruzioni per aggiungere l\'app alla schermata Home';
+  }
+  card.style.display = 'block';
+}
+
+function handleInstall() {
+  if (deferredPrompt) {
+    // Chrome Android: trigger native prompt
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      deferredPrompt = null;
+      if (choice.outcome === 'accepted') {
+        document.getElementById('install-card').style.display = 'none';
+        toast('App installata! 🎉');
+      }
+    });
+  } else {
+    // iOS or Chrome without prompt: show manual instructions
+    openSheet('sh-install');
+  }
+}
+
+function dismissInstallCard() {
+  document.getElementById('install-card').style.display = 'none';
+  // Don't show again for 7 days
+  localStorage.setItem(INSTALL_DISMISSED_KEY, Date.now() + 7 * 24 * 3600 * 1000);
+}
+
+// Chrome fires this when PWA install criteria are met
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstallCard('prompt');
+});
+
+// App was installed successfully
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-card').style.display = 'none';
+  deferredPrompt = null;
+  toast('App installata! 🎉');
+});
+
+// On load: if not standalone and no deferred prompt within 1s, show manual instructions
+if (!IS_STANDALONE) {
+  setTimeout(() => {
+    if (!deferredPrompt) showInstallCard('manual');
+  }, 1000);
+}
+
+// ---- BACKUP AUTOMATICO DOMENICA 23:00 ----
+function doBackup() {
+  const blob = new Blob([JSON.stringify({exported: new Date().toISOString(), data: D}, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `workout_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  localStorage.setItem('backup_dismissed_week', getWeekKey());
+  toast('Backup scaricato! ✓');
+}
+
+function getWeekKey() {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return d.getUTCFullYear() + '-W' + Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function checkBackupReminder() {
+  const now = new Date();
+  if (now.getDay() !== 0 || now.getHours() !== 23) return;
+  if (localStorage.getItem('backup_dismissed_week') === getWeekKey()) return;
+  if (!D.workouts.length) return;
+  toast('💾 Domenica sera — ricorda di fare il backup! (Tab Dati → Scarica JSON)');
+}
+checkBackupReminder();
+setInterval(checkBackupReminder, 30 * 60 * 1000);
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
