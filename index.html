@@ -511,24 +511,24 @@ textarea { resize: vertical; min-height: 70px; }
   </div>
 
   <div class="sec-label">Installa app</div>
-  <div class="card">
-    <!-- Bottone nativo Android Chrome: appare solo se il browser supporta il prompt -->
-    <div id="install-native-area" style="display:none;margin-bottom:14px">
-      <button class="btn btn-primary btn-block" id="install-native-btn" onclick="doInstallNative()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        📲 Installa su questo dispositivo
-      </button>
-      <div style="font-size:11px;color:var(--hint);margin-top:6px;text-align:center">Il browser ha rilevato che puoi installare l'app direttamente</div>
+  <div class="card" id="install-card">
+    <button class="btn btn-primary btn-block" onclick="doInstallNative()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      📲 Installa come app
+    </button>
+    <div style="font-size:11px;color:var(--hint);margin-top:8px;text-align:center">Accesso rapido dalla schermata home, funziona offline</div>
+    <!-- Istruzioni manuali: visibili solo dopo il tap se il prompt nativo non è disponibile -->
+    <div id="install-manual" style="display:none;margin-top:14px">
+      <div style="font-size:13px;color:var(--muted);line-height:1.9">
+        <strong style="color:var(--text);display:block;margin-bottom:4px">🤖 Android (Chrome)</strong>
+        Tocca il menu <strong style="color:var(--text)">⋮</strong> in alto a destra<br>
+        → <strong style="color:var(--text)">"Installa app"</strong> oppure <strong style="color:var(--text)">"Aggiungi a schermata Home"</strong>
+        <div class="divider"></div>
+        <strong style="color:var(--text);display:block;margin-bottom:4px">🍎 iPhone (Safari)</strong>
+        Tocca l'icona <strong style="color:var(--text)">condividi</strong> in basso<br>
+        → <strong style="color:var(--text)">"Aggiungi a schermata Home"</strong>
+      </div>
     </div>
-    <!-- Istruzioni manuali sempre visibili -->
-    <div style="font-size:13px;color:var(--muted);line-height:1.8">
-      <strong style="color:var(--text);display:block;margin-bottom:6px">🤖 Android (Chrome)</strong>
-      Menu <strong style="color:var(--text)">⋮</strong> in alto a destra → <strong style="color:var(--text)">"Aggiungi a schermata Home"</strong> o <strong style="color:var(--text)">"Installa app"</strong>
-      <div class="divider"></div>
-      <strong style="color:var(--text);display:block;margin-bottom:6px">🍎 iPhone (Safari)</strong>
-      Icona <strong style="color:var(--text)">condividi</strong> in basso → <strong style="color:var(--text)">"Aggiungi a schermata Home"</strong>
-    </div>
-    <div style="font-size:11px;color:var(--hint);margin-top:10px">Una volta installata funziona completamente offline.</div>
   </div>
 
   <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--hint);font-family:var(--mono)">v0.00</div>
@@ -1790,32 +1790,39 @@ if ('serviceWorker' in navigator) {
 let deferredPrompt = null;
 const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
+// Nascondi la card se già installata come app
+if (IS_STANDALONE) {
+  const card = document.getElementById('install-card');
+  if (card) card.style.display = 'none';
+}
+
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
-  // Mostra il bottone nativo nella card Dati solo se non già installata
-  if (!IS_STANDALONE) {
-    const area = document.getElementById('install-native-area');
-    if (area) area.style.display = 'block';
-  }
 });
 
 function doInstallNative() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(choice => {
-    if (choice.outcome === 'accepted') {
-      toast('App installata! 🎉');
-      const area = document.getElementById('install-native-area');
-      if (area) area.style.display = 'none';
-    }
-    deferredPrompt = null;
-  });
+  if (deferredPrompt) {
+    // Prompt nativo disponibile: lo lancia direttamente
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') {
+        toast('App installata! 🎉');
+        const card = document.getElementById('install-card');
+        if (card) card.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  } else {
+    // Prompt non disponibile: mostra le istruzioni manuali
+    const manual = document.getElementById('install-manual');
+    if (manual) manual.style.display = manual.style.display === 'none' ? 'block' : 'none';
+  }
 }
 
 window.addEventListener('appinstalled', () => {
-  const area = document.getElementById('install-native-area');
-  if (area) area.style.display = 'none';
+  const card = document.getElementById('install-card');
+  if (card) card.style.display = 'none';
   toast('App installata! 🎉');
 });
 
