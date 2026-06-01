@@ -191,6 +191,25 @@ textarea { resize: vertical; min-height: 70px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
+/* Install banner */
+#install-banner {
+  display: none; position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px; z-index: 300;
+  background: var(--accent); color: #fff;
+  padding: 12px 16px; font-size: 13px;
+  flex-direction: column; gap: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+}
+#install-banner.show { display: flex; }
+#install-banner strong { font-size: 14px; }
+.install-banner-btns { display: flex; gap: 8px; margin-top: 2px; }
+.install-banner-btns button {
+  flex: 1; padding: 8px; border-radius: 8px; border: none;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+}
+.ibtn-yes { background: #fff; color: var(--accent); }
+.ibtn-no  { background: rgba(255,255,255,.2); color: #fff; }
+
 /* Template cards */
 .tpl-card {
   background: var(--bg2); border: 1px solid var(--border);
@@ -220,6 +239,16 @@ textarea { resize: vertical; min-height: 70px; }
     </div>
   </div>
 
+
+  <!-- INSTALL BANNER -->
+  <div id="install-banner">
+    <strong>📲 Installa l'app sul telefono</strong>
+    <div style="font-size:12px;opacity:.85">Accesso rapido, funziona offline, nessun browser aperto</div>
+    <div class="install-banner-btns">
+      <button class="ibtn-yes" onclick="doInstall()">Installa</button>
+      <button class="ibtn-no" onclick="dismissInstall()">Non ora</button>
+    </div>
+  </div>
 
   <div class="metrics">
     <div class="metric">
@@ -531,7 +560,7 @@ textarea { resize: vertical; min-height: 70px; }
     </div>
   </div>
 
-  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--hint);font-family:var(--mono)">v0.00</div>
+  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--hint);font-family:var(--mono)">v0.01</div>
 
 </div>
 
@@ -1790,7 +1819,7 @@ if ('serviceWorker' in navigator) {
 let deferredPrompt = null;
 const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
-// Nascondi la card se già installata come app
+// Nascondi la card install se già installata come app
 if (IS_STANDALONE) {
   const card = document.getElementById('install-card');
   if (card) card.style.display = 'none';
@@ -1799,28 +1828,38 @@ if (IS_STANDALONE) {
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
+  if (!IS_STANDALONE) {
+    document.getElementById('install-banner').classList.add('show');
+  }
 });
+
+function doInstall() {
+  document.getElementById('install-banner').classList.remove('show');
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') toast('App installata! 🎉');
+      deferredPrompt = null;
+    });
+  }
+}
+
+function dismissInstall() {
+  document.getElementById('install-banner').classList.remove('show');
+}
 
 function doInstallNative() {
   if (deferredPrompt) {
-    // Prompt nativo disponibile: lo lancia direttamente
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(choice => {
-      if (choice.outcome === 'accepted') {
-        toast('App installata! 🎉');
-        const card = document.getElementById('install-card');
-        if (card) card.style.display = 'none';
-      }
-      deferredPrompt = null;
-    });
+    doInstall();
   } else {
-    // Prompt non disponibile: mostra le istruzioni manuali
+    // Nessun prompt nativo: mostra istruzioni manuali
     const manual = document.getElementById('install-manual');
     if (manual) manual.style.display = manual.style.display === 'none' ? 'block' : 'none';
   }
 }
 
 window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').classList.remove('show');
   const card = document.getElementById('install-card');
   if (card) card.style.display = 'none';
   toast('App installata! 🎉');
