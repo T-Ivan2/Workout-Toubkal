@@ -191,25 +191,6 @@ textarea { resize: vertical; min-height: 70px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-/* Install banner */
-#install-banner {
-  display: none; position: fixed; top: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px; z-index: 300;
-  background: var(--accent); color: #fff;
-  padding: 12px 16px; font-size: 13px;
-  flex-direction: column; gap: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,.4);
-}
-#install-banner.show { display: flex; }
-#install-banner strong { font-size: 14px; }
-.install-banner-btns { display: flex; gap: 8px; }
-.install-banner-btns button {
-  flex: 1; padding: 8px; border-radius: 8px; border: none;
-  font-size: 13px; font-weight: 500; cursor: pointer;
-}
-.ibtn-yes { background: #fff; color: var(--accent); }
-.ibtn-no  { background: rgba(255,255,255,.2); color: #fff; }
-
 /* Template cards */
 .tpl-card {
   background: var(--bg2); border: 1px solid var(--border);
@@ -239,16 +220,7 @@ textarea { resize: vertical; min-height: 70px; }
     </div>
   </div>
 
-  <!-- INSTALL BANNER (Android Chrome) -->
-  <div id="install-banner">
-  <strong>📲 Installa l'app sul telefono</strong>
-  <div style="font-size:12px;opacity:.9">Accesso rapido, funziona offline, nessun browser aperto</div>
-  <div class="install-banner-btns">
-    <button class="ibtn-yes" onclick="doInstall()">Installa</button>
-    <button class="ibtn-no" onclick="dismissInstall()">Non ora</button>
-  </div>
 
-</div>
   <div class="metrics">
     <div class="metric">
       <div class="label">Questo mese</div>
@@ -289,11 +261,6 @@ textarea { resize: vertical; min-height: 70px; }
     Registra allenamento
   </button>
 
-  <button class="btn btn-ghost btn-block" onclick="openSheet('sh-install')" style="margin-top:8px;border-color:var(--accent);color:var(--accent)" id="install-home-btn">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    📲 Installa come app
-  </button>
-  </button>
 </div>
 
 <!-- LOG -->
@@ -509,15 +476,6 @@ textarea { resize: vertical; min-height: 70px; }
     </div>
   </div>
 
-  <div class="sec-label">Come installare l'app</div>
-  <div class="card">
-    <div style="font-size:13px;color:var(--muted);line-height:1.7">
-      <strong style="color:var(--text)">iPhone (Safari):</strong> tocca l'icona condividi → "Aggiungi a schermata Home"<br><br>
-      <strong style="color:var(--text)">Android (Chrome):</strong> menu ⋮ → "Aggiungi a schermata Home" o "Installa app"<br><br>
-      Una volta installata funziona completamente offline.
-    </div>
-  </div>
-
   <div class="sec-label">Importa lista esercizi</div>
   <div class="card">
     <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Carica un file JSON con esercizi personalizzati (per gruppo muscolare). Gli esercizi già presenti non vengono duplicati.</div>
@@ -551,6 +509,30 @@ textarea { resize: vertical; min-height: 70px; }
       </button>
     </div>
   </div>
+
+  <div class="sec-label">Installa app</div>
+  <div class="card">
+    <!-- Bottone nativo Android Chrome: appare solo se il browser supporta il prompt -->
+    <div id="install-native-area" style="display:none;margin-bottom:14px">
+      <button class="btn btn-primary btn-block" id="install-native-btn" onclick="doInstallNative()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        📲 Installa su questo dispositivo
+      </button>
+      <div style="font-size:11px;color:var(--hint);margin-top:6px;text-align:center">Il browser ha rilevato che puoi installare l'app direttamente</div>
+    </div>
+    <!-- Istruzioni manuali sempre visibili -->
+    <div style="font-size:13px;color:var(--muted);line-height:1.8">
+      <strong style="color:var(--text);display:block;margin-bottom:6px">🤖 Android (Chrome)</strong>
+      Menu <strong style="color:var(--text)">⋮</strong> in alto a destra → <strong style="color:var(--text)">"Aggiungi a schermata Home"</strong> o <strong style="color:var(--text)">"Installa app"</strong>
+      <div class="divider"></div>
+      <strong style="color:var(--text);display:block;margin-bottom:6px">🍎 iPhone (Safari)</strong>
+      Icona <strong style="color:var(--text)">condividi</strong> in basso → <strong style="color:var(--text)">"Aggiungi a schermata Home"</strong>
+    </div>
+    <div style="font-size:11px;color:var(--hint);margin-top:10px">Una volta installata funziona completamente offline.</div>
+  </div>
+
+  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--hint);font-family:var(--mono)">v0.00</div>
+
 </div>
 
 <!-- NAV -->
@@ -1808,55 +1790,32 @@ if ('serviceWorker' in navigator) {
 let deferredPrompt = null;
 const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
-// Hide install button if already running as installed app
-if (IS_STANDALONE) {
-  const btn = document.getElementById('install-home-btn');
-  if (btn) btn.style.display = 'none';
-}
-
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
-  // Override the install button to trigger native prompt directly
-  const btn = document.getElementById('install-home-btn');
-  if (btn) {
-    btn.onclick = () => {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(r => {
-        if (r.outcome === 'accepted') {
-          btn.style.display = 'none';
-          toast('App installata! 🎉');
-        }
-        deferredPrompt = null;
-      });
-    };
+  // Mostra il bottone nativo nella card Dati solo se non già installata
+  if (!IS_STANDALONE) {
+    const area = document.getElementById('install-native-area');
+    if (area) area.style.display = 'block';
   }
-  // Show install banner every time
-  document.getElementById('install-banner').classList.add('show');
 });
 
-function doInstall() {
-  document.getElementById('install-banner').classList.remove('show');
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(choice => {
-      if (choice.outcome === 'accepted') {
-        const btn = document.getElementById('install-home-btn');
-        if (btn) btn.style.display = 'none';
-        toast('App installata! 🎉');
-      }
-      deferredPrompt = null;
-    });
-  }
-}
-
-function dismissInstall() {
-  document.getElementById('install-banner').classList.remove('show');
+function doInstallNative() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(choice => {
+    if (choice.outcome === 'accepted') {
+      toast('App installata! 🎉');
+      const area = document.getElementById('install-native-area');
+      if (area) area.style.display = 'none';
+    }
+    deferredPrompt = null;
+  });
 }
 
 window.addEventListener('appinstalled', () => {
-  const btn = document.getElementById('install-home-btn');
-  if (btn) btn.style.display = 'none';
+  const area = document.getElementById('install-native-area');
+  if (area) area.style.display = 'none';
   toast('App installata! 🎉');
 });
 
