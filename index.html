@@ -1,60 +1,1865 @@
-{
-  "gambe": [
-    {"name": "Squat con bilanciere", "unit": "kg"},
-    {"name": "Stacco da terra", "unit": "kg"},
-    {"name": "Affondi bulgari", "unit": "kg"},
-    {"name": "Step-up con manubri", "unit": "kg"},
-    {"name": "Hip thrust", "unit": "kg"},
-    {"name": "Leg press", "unit": "kg"},
-    {"name": "Pistol squat", "unit": "bw"},
-    {"name": "Wall sit", "unit": "bw"}
-  ],
-  "schiena": [
-    {"name": "Rematori bilanciere", "unit": "kg"},
-    {"name": "Lat machine", "unit": "kg"},
-    {"name": "Trazioni", "unit": "bw"},
-    {"name": "Rematori manubri", "unit": "kg"},
-    {"name": "Good morning", "unit": "kg"}
-  ],
-  "petto": [
-    {"name": "Press panca", "unit": "kg"},
-    {"name": "Panca inclinata", "unit": "kg"},
-    {"name": "Panca declinata", "unit": "kg"},
-    {"name": "Croci manubri", "unit": "kg"},
-    {"name": "Push-up", "unit": "bw"}
-  ],
-  "spalle": [
-    {"name": "Arnold press", "unit": "kg"},
-    {"name": "Face pull", "unit": "kg"},
-    {"name": "Military press", "unit": "kg"},
-    {"name": "Alzate laterali", "unit": "kg"},
-    {"name": "Alzate frontali", "unit": "kg"}
-  ],
-  "bicipiti": [
-    {"name": "Curl bilanciere", "unit": "kg"},
-    {"name": "Curl manubri", "unit": "kg"},
-    {"name": "Curl martello", "unit": "kg"}
-  ],
-  "tricipiti": [
-    {"name": "French press", "unit": "kg"},
-    {"name": "Tricipiti ai cavi", "unit": "kg"},
-    {"name": "Dips", "unit": "bw"}
-  ],
-  "core": [
-    {"name": "Plank", "unit": "bw"},
-    {"name": "Plank laterale", "unit": "bw"},
-    {"name": "Dead bug", "unit": "bw"},
-    {"name": "Farmer carry", "unit": "kg"},
-    {"name": "Ab wheel", "unit": "bw"},
-    {"name": "Russian twist", "unit": "kg"},
-    {"name": "Hollow body hold", "unit": "bw"}
-  ],
-  "full": [
-    {"name": "Kettlebell swing", "unit": "kg"},
-    {"name": "Turkish get-up", "unit": "kg"},
-    {"name": "Burpees", "unit": "bw"},
-    {"name": "Man maker", "unit": "kg"},
-    {"name": "Thruster", "unit": "kg"},
-    {"name": "Clean and press", "unit": "kg"}
-  ]
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workout">
+<meta name="theme-color" content="#0f1117">
+<title>Workout Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #0f1117;
+  --bg2: #181b24;
+  --bg3: #1f2330;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #f0f0f0;
+  --muted: #7a7f8e;
+  --hint: #454a58;
+  --accent: #4f8ef7;
+  --accent-bg: rgba(79,142,247,0.12);
+  --green: #34c78a;
+  --green-bg: rgba(52,199,138,0.1);
+  --amber: #f0a040;
+  --amber-bg: rgba(240,160,64,0.1);
+  --red: #e05a5a;
+  --red-bg: rgba(224,90,90,0.1);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --nav-h: 64px;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
 }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; }
+body { min-height: 100dvh; overflow-x: hidden; }
+input, select, textarea, button { font-family: var(--font); font-size: 14px; }
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+/* Layout */
+#app { max-width: 480px; margin: 0 auto; position: relative; }
+.screen { display: none; padding: 20px 16px calc(var(--nav-h) + 20px); min-height: 100dvh; }
+.screen.active { display: block; }
+
+/* Nav */
+nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  background: rgba(15,17,23,0.92); backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; height: var(--nav-h);
+  z-index: 50; padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; background: none; border: none; color: var(--hint); cursor: pointer;
+  font-size: 10px; letter-spacing: .03em; text-transform: uppercase; transition: color .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.nav-btn.active { color: var(--accent); }
+
+/* Typography */
+h1 { font-size: 22px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 4px; }
+h2 { font-size: 17px; font-weight: 500; margin-bottom: 14px; }
+h3 { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+.label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+.mono { font-family: var(--mono); }
+
+/* Cards */
+.card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+}
+.card-sm { padding: 10px 14px; }
+
+/* Form elements */
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+input[type=text], input[type=number], input[type=date], select, textarea {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); color: var(--text); padding: 10px 12px;
+  outline: none; transition: border-color .2s; -webkit-appearance: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a7f8e' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+textarea { resize: vertical; min-height: 70px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 11px 18px; border-radius: var(--radius-sm); border: none;
+  font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity .15s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(.97); }
+.btn-block { width: 100%; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-ghost { background: var(--bg3); color: var(--text); border: 1px solid var(--border2); }
+.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(224,90,90,.2); }
+.btn-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,199,138,.2); }
+.btn-sm { padding: 7px 12px; font-size: 13px; }
+
+/* Tags */
+.tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+.tag-gym { background: var(--accent-bg); color: var(--accent); }
+.tag-cardio { background: var(--green-bg); color: var(--green); }
+.tag-hike { background: var(--amber-bg); color: var(--amber); }
+
+/* Metrics */
+.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.metric { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.metric-val { font-size: 26px; font-weight: 600; font-family: var(--mono); line-height: 1; margin: 4px 0 2px; }
+.metric-sub { font-size: 11px; color: var(--hint); }
+
+/* Progress bar */
+.pbar-wrap { background: var(--bg3); border-radius: 4px; height: 5px; margin-top: 6px; }
+.pbar { height: 5px; border-radius: 4px; background: var(--green); transition: width .4s; }
+
+/* Exercise rows */
+.ex-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); }
+.ex-row:last-child { border-bottom: none; }
+.ex-row-name { font-size: 14px; font-weight: 500; }
+.ex-row-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.pr-badge { background: var(--green-bg); color: var(--green); font-size: 11px; padding: 3px 8px; border-radius: 20px; font-family: var(--mono); white-space: nowrap; }
+
+/* Set rows */
+.set-grid { display: grid; grid-template-columns: 28px 1fr 1fr 32px; gap: 6px; align-items: center; margin-bottom: 6px; }
+.set-num { font-size: 12px; color: var(--hint); text-align: center; font-family: var(--mono); }
+.set-grid input { margin: 0; padding: 8px 10px; }
+.copy-btn { background: var(--bg3); border: 1px solid var(--border2); border-radius: 6px; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; height: 36px; width: 32px; }
+
+/* History */
+.hist-item { padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.hist-item:last-child { border-bottom: none; }
+.hist-date { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.hist-name { font-size: 15px; font-weight: 500; }
+.hist-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+/* Empty state */
+.empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+.empty svg { width: 40px; height: 40px; stroke: var(--hint); margin: 0 auto 10px; display: block; }
+
+/* Section label */
+.sec-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 18px 0 8px; }
+
+/* Toast */
+#toast {
+  position: fixed; bottom: calc(var(--nav-h) + 12px); left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--bg3); border: 1px solid var(--border2); color: var(--text);
+  padding: 10px 18px; border-radius: 20px; font-size: 13px; z-index: 200;
+  opacity: 0; pointer-events: none; transition: all .25s; white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Bottom sheet modal */
+.sheet-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+  z-index: 100; align-items: flex-end; justify-content: center;
+}
+.sheet-overlay.open { display: flex; }
+.sheet {
+  background: var(--bg2); border-radius: 18px 18px 0 0;
+  border: 1px solid var(--border); border-bottom: none;
+  padding: 0 16px 32px; width: 100%; max-width: 480px;
+  max-height: 90dvh; overflow-y: auto;
+}
+.sheet-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 12px auto 16px; }
+
+/* Chart container */
+.chart-box { position: relative; height: 180px; margin: 8px 0; }
+
+/* Filter pills */
+.filter-row { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
+.filter-row::-webkit-scrollbar { display: none; }
+.pill { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--muted); font-size: 13px; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+.pill.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(79,142,247,.3); }
+
+/* Export section */
+.export-row { display: flex; gap: 8px; margin-bottom: 8px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Template cards */
+.tpl-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+}
+.tpl-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+.tpl-name { font-size:15px; font-weight:500; }
+.tpl-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+.tpl-actions { display:flex; gap:6px; margin-top:10px; }
+.tpl-ex-chip { display:inline-block; font-size:11px; background:var(--bg3); border:1px solid var(--border2); border-radius:20px; padding:2px 8px; margin:2px 2px 0 0; color:var(--muted); }
+.tag-tpl { background: rgba(167,139,250,0.15); color: #a78bfa; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HOME -->
+<div id="s-home" class="screen active">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <h1 id="home-title">Buongiorno</h1>
+      <div style="font-size:13px;color:var(--muted)" id="home-sub"></div>
+    </div>
+    <div style="text-align:right">
+      <div class="mono" style="font-size:22px;font-weight:600;color:var(--accent)" id="days-left">—</div>
+      <div style="font-size:11px;color:var(--muted)">giorni al Toubkal</div>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="label">Questo mese</div>
+      <div class="metric-val" id="stat-month">0</div>
+      <div class="metric-sub">allenamenti</div>
+    </div>
+    <div class="metric">
+      <div class="label">Questa settimana</div>
+      <div class="metric-val" id="stat-week">0</div>
+      <div class="metric-sub">sessioni</div>
+    </div>
+    <div class="metric">
+      <div class="label">Uscite outdoor</div>
+      <div class="metric-val" id="stat-hikes">0</div>
+      <div class="metric-sub">/ 13 obiettivo</div>
+    </div>
+    <div class="metric">
+      <div class="label">Striscia</div>
+      <div class="metric-val" id="stat-streak">0</div>
+      <div class="metric-sub">settimane</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:13px">Preparazione Toubkal</div>
+      <div style="font-size:13px;font-family:var(--mono);color:var(--green)" id="hike-prog-txt">0 / 13</div>
+    </div>
+    <div class="pbar-wrap"><div class="pbar" id="hike-pbar" style="width:0%"></div></div>
+    <div style="font-size:11px;color:var(--hint);margin-top:6px">1 uscita a settimana fino a settembre</div>
+  </div>
+
+  <div class="sec-label">Ultimo allenamento</div>
+  <div id="last-card"><div class="empty"><svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12"/></svg>Nessun allenamento registrato</div></div>
+
+  <button class="btn btn-primary btn-block" onclick="nav('log')" style="margin-top:8px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Registra allenamento
+  </button>
+
+  <button class="btn btn-ghost btn-block" onclick="openSheet('sh-install')" style="margin-top:8px;border-color:var(--accent);color:var(--accent)" id="install-home-btn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    📲 Installa come app
+  </button>
+  </button>
+</div>
+
+<!-- LOG -->
+<div id="s-log" class="screen">
+  <h2>Nuovo allenamento</h2>
+  <div class="card">
+    <div class="field">
+      <label>Tipo di sessione</label>
+      <select id="log-type" onchange="switchType()">
+        <option value="gym">🏋 Palestra</option>
+        <option value="cardio">🚴 Cardio</option>
+        <option value="hike">🥾 Escursione / Trekking</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Nome sessione</label>
+      <input type="text" id="log-name" placeholder="es. Gambe e core">
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label>Data</label>
+      <input type="date" id="log-date">
+    </div>
+  </div>
+
+  <!-- GYM -->
+  <div id="log-gym">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="sec-label" style="margin:0">Esercizi</div>
+      <button class="btn btn-ghost btn-sm" onclick="openAddEx()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Aggiungi
+      </button>
+    </div>
+    <div id="log-ex-list"><div class="empty" style="padding:20px"><svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12"/></svg>Nessun esercizio</div></div>
+  </div>
+
+  <!-- CARDIO -->
+  <div id="log-cardio" style="display:none">
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Durata (min)</label><input type="number" id="c-dur" placeholder="45"></div>
+        <div class="field"><label>Distanza (km)</label><input type="number" id="c-dist" placeholder="5" step="0.1"></div>
+        <div class="field"><label>Dislivello (m)</label><input type="number" id="c-elev" placeholder="200"></div>
+        <div class="field"><label>FC media (bpm)</label><input type="number" id="c-hr" placeholder="140"></div>
+      </div>
+      <div class="field"><label>Zaino (kg)</label><input type="number" id="c-pack" placeholder="0" step="0.5"></div>
+      <div class="field" style="margin-bottom:0"><label>Note</label><textarea id="c-notes" placeholder="Come è andata?"></textarea></div>
+    </div>
+  </div>
+
+  <!-- HIKE -->
+  <div id="log-hike" style="display:none">
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Durata (ore)</label><input type="number" id="h-dur" placeholder="3.5" step="0.5"></div>
+        <div class="field"><label>Distanza (km)</label><input type="number" id="h-dist" placeholder="12" step="0.5"></div>
+        <div class="field"><label>Dislivello + (m)</label><input type="number" id="h-elev" placeholder="600"></div>
+        <div class="field"><label>Quota max (m)</label><input type="number" id="h-alt" placeholder="1800"></div>
+      </div>
+      <div class="field"><label>Peso zaino (kg)</label><input type="number" id="h-pack" placeholder="8" step="0.5"></div>
+      <div class="field">
+        <label>Sensazione</label>
+        <select id="h-feel">
+          <option value="5">⭐⭐⭐⭐⭐ Ottima</option>
+          <option value="4">⭐⭐⭐⭐ Buona</option>
+          <option value="3" selected>⭐⭐⭐ Nella media</option>
+          <option value="2">⭐⭐ Faticosa</option>
+          <option value="1">⭐ Molto dura</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0"><label>Note</label><textarea id="h-notes" placeholder="Terreno, meteo..."></textarea></div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-block" onclick="saveWorkout()" style="margin-top:8px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    Salva allenamento
+  </button>
+</div>
+
+<!-- HISTORY -->
+<div id="s-history" class="screen">
+  <h2>Storico</h2>
+  <div class="filter-row">
+    <button class="pill active" id="fp-all" onclick="setFilter('all')">Tutti</button>
+    <button class="pill" id="fp-gym" onclick="setFilter('gym')">Palestra</button>
+    <button class="pill" id="fp-cardio" onclick="setFilter('cardio')">Cardio</button>
+    <button class="pill" id="fp-hike" onclick="setFilter('hike')">Escursioni</button>
+  </div>
+  <div id="hist-list"></div>
+</div>
+
+<!-- SCHEDE -->
+<div id="s-templates" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <h2 style="margin-bottom:0">Schede</h2>
+    <button class="btn btn-ghost btn-sm" onclick="openNewTemplate()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Nuova
+    </button>
+  </div>
+  <div id="tpl-list"></div>
+</div>
+
+<!-- PROGRESS -->
+<div id="s-progress" class="screen">
+  <h2>Progressi</h2>
+  <div class="card">
+    <div class="field" style="margin-bottom:8px">
+      <label>Analizza esercizio</label>
+      <select id="prog-sel" onchange="renderProg()"><option value="">— Seleziona —</option></select>
+    </div>
+    <div id="prog-stats" style="display:none">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="tag tag-gym mono" id="p-pr">PR —</span>
+        <span class="tag tag-gym mono" id="p-last">Ultima —</span>
+        <span class="tag tag-gym" id="p-sess">0 sessioni</span>
+      </div>
+      <div class="chart-box"><canvas id="prog-chart"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Volume settimanale</h3>
+    <div class="chart-box"><canvas id="vol-chart"></canvas></div>
+  </div>
+  <div class="card">
+    <h3>Dislivello escursioni</h3>
+    <div class="chart-box"><canvas id="hike-chart"></canvas></div>
+  </div>
+</div>
+
+<!-- ESERCIZI -->
+<div id="s-exercises" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <h2 style="margin-bottom:0">Esercizi</h2>
+    <button class="btn btn-ghost btn-sm" onclick="openNewEx()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Nuovo
+    </button>
+  </div>
+  <div id="ex-list"></div>
+</div>
+
+<!-- IMPOSTAZIONI / EXPORT -->
+<div id="s-settings" class="screen">
+  <h2>Impostazioni e dati</h2>
+
+  <div class="sec-label">Gestione esercizi</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Aggiungi nuovi esercizi al tuo catalogo. Saranno disponibili nella lookup durante l'allenamento.</div>
+    <div id="dati-ex-list" style="margin-bottom:12px"></div>
+    <button class="btn btn-ghost btn-sm btn-block" onclick="openNewEx()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Aggiungi esercizio
+    </button>
+  </div>
+
+  <div class="sec-label">Esporta dati</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Scegli cosa esportare e in quale formato.</div>
+    <div class="field">
+      <label>Tipo di dati</label>
+      <select id="exp-type">
+        <option value="all">Tutti gli allenamenti</option>
+        <option value="gym">Solo palestra</option>
+        <option value="cardio">Solo cardio</option>
+        <option value="hike">Solo escursioni</option>
+        <option value="exercises">Lista esercizi</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Periodo</label>
+      <select id="exp-period">
+        <option value="all">Tutto</option>
+        <option value="month">Ultimo mese</option>
+        <option value="3m">Ultimi 3 mesi</option>
+        <option value="year">Ultimo anno</option>
+      </select>
+    </div>
+    <div class="export-row">
+      <button class="btn btn-green btn-sm" style="flex:1" onclick="doExport('json')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Scarica JSON
+      </button>
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="doExport('csv')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Scarica CSV
+      </button>
+    </div>
+    <div style="font-size:11px;color:var(--hint);margin-top:6px">
+      Il file viene salvato nella cartella Download del tuo telefono.
+    </div>
+  </div>
+
+  <div class="sec-label">Importa dati</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Carica un file JSON precedentemente esportato per ripristinare i dati.</div>
+    <label for="imp-file" class="btn btn-ghost" style="display:flex;align-items:center;gap:6px;justify-content:center;cursor:pointer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Carica file JSON
+    </label>
+    <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
+
+  <div class="sec-label">Dati app</div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:14px;font-weight:500">Totale allenamenti</div>
+        <div style="font-size:13px;color:var(--muted)" id="set-total">0 sessioni registrate</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="clearData()">Cancella tutto</button>
+    </div>
+  </div>
+
+  <div class="sec-label">Come installare l'app</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--muted);line-height:1.7">
+      <strong style="color:var(--text)">iPhone (Safari):</strong> tocca l'icona condividi → "Aggiungi a schermata Home"<br><br>
+      <strong style="color:var(--text)">Android (Chrome):</strong> menu ⋮ → "Aggiungi a schermata Home" o "Installa app"<br><br>
+      Una volta installata funziona completamente offline.
+    </div>
+  </div>
+
+  <div class="sec-label">Importa lista esercizi</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Carica un file JSON con esercizi personalizzati (per gruppo muscolare). Gli esercizi già presenti non vengono duplicati.</div>
+    <label for="imp-ex-file" class="btn btn-ghost" style="display:flex;align-items:center;gap:6px;justify-content:center;cursor:pointer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Carica esercizi JSON
+    </label>
+    <input type="file" id="imp-ex-file" accept=".json" style="display:none" onchange="importExercises(event)">
+    <div style="font-size:11px;color:var(--hint);margin-top:8px">
+      Scarica il <a id="ex-template-link" href="#" onclick="downloadExTemplate(); return false;" style="color:var(--accent)">template JSON di esempio</a> per vedere il formato corretto.
+    </div>
+  </div>
+
+  <div class="sec-label">Aggiornamento app</div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div>
+        <div style="font-size:14px;font-weight:500">Versione installata</div>
+        <div style="font-size:12px;color:var(--muted)" id="app-version-label">Controllo in corso…</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="checkForUpdate()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Controlla
+      </button>
+    </div>
+    <div id="update-status" style="font-size:13px;color:var(--muted)">Tocca "Controlla" per verificare se è disponibile un aggiornamento da GitHub.</div>
+    <div id="update-btn-area" style="margin-top:10px;display:none">
+      <button class="btn btn-primary btn-block" onclick="applyUpdate()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Scarica e installa aggiornamento
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <button class="nav-btn active" id="nb-home" onclick="nav('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </button>
+  <button class="nav-btn" id="nb-log" onclick="nav('log')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Registra
+  </button>
+  <button class="nav-btn" id="nb-templates" onclick="nav('templates')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+    Schede
+  </button>
+  <button class="nav-btn" id="nb-history" onclick="nav('history')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Storico
+  </button>
+  <button class="nav-btn" id="nb-progress" onclick="nav('progress')">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Progressi
+  </button>
+  <button class="nav-btn" id="nb-settings" onclick="nav('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Dati
+  </button>
+</nav>
+
+<!-- SHEET: ADD EXERCISE TO LOG -->
+<div class="sheet-overlay" id="sh-add-ex">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 style="margin-bottom:14px">Aggiungi esercizio</h3>
+    <div class="field">
+      <label>Esercizio</label>
+      <select id="sh-ex-sel" onchange="buildSets()">
+        <option value="">— Seleziona —</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Numero di serie</label>
+      <select id="sh-sets-n" onchange="buildSets()">
+        <option value="1">1 serie</option>
+        <option value="2">2 serie</option>
+        <option value="3" selected>3 serie</option>
+        <option value="4">4 serie</option>
+        <option value="5">5 serie</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:28px 1fr 1fr 32px;gap:6px;margin-bottom:6px">
+      <span></span>
+      <span style="font-size:11px;color:var(--muted);padding-left:2px">Peso (kg)</span>
+      <span style="font-size:11px;color:var(--muted);padding-left:2px">Ripetizioni</span>
+      <span></span>
+    </div>
+    <div id="sets-container"></div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px">
+      <button class="btn btn-ghost" onclick="resetAddExSheet(); closeSheet('sh-add-ex')">Annulla</button>
+      <button class="btn btn-primary" onclick="confirmEx()">Aggiungi</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHEET: NEW EXERCISE -->
+<div class="sheet-overlay" id="sh-new-ex">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 style="margin-bottom:14px">Nuovo esercizio</h3>
+    <div class="field"><label>Nome</label><input type="text" id="ne-name" placeholder="es. Squat goblet"></div>
+    <div class="field"><label>Categoria</label>
+      <select id="ne-cat">
+        <option value="gambe">Gambe</option>
+        <option value="schiena">Schiena</option>
+        <option value="petto">Petto</option>
+        <option value="spalle">Spalle</option>
+        <option value="bicipiti">Bicipiti</option>
+        <option value="tricipiti">Tricipiti</option>
+        <option value="avambracci">Avambracci</option>
+        <option value="polpacci">Polpacci</option>
+        <option value="core">Core</option>
+        <option value="full">Full body</option>
+      </select>
+    </div>
+    <div class="field"><label>Unità</label>
+      <select id="ne-unit"><option value="kg">kg</option><option value="bw">Corpo libero</option></select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:4px">
+      <button class="btn btn-ghost" onclick="closeSheet('sh-new-ex')">Annulla</button>
+      <button class="btn btn-primary" onclick="saveNewEx()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHEET: WORKOUT DETAIL -->
+<div class="sheet-overlay" id="sh-detail">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="sh-detail-body"></div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:14px">
+      <button class="btn btn-danger" id="sh-del-btn">Elimina</button>
+      <button class="btn btn-ghost" onclick="closeSheet('sh-detail')">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHEET: NEW / EDIT TEMPLATE -->
+<div class="sheet-overlay" id="sh-tpl-edit">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 style="margin-bottom:14px" id="tpl-edit-title">Nuova scheda</h3>
+    <div class="field"><label>Nome scheda</label><input type="text" id="tpl-name-inp" placeholder="es. Gambe e Core"></div>
+    <div class="field">
+      <label>Tipo</label>
+      <select id="tpl-type-sel" onchange="updateTplExSection()">
+        <option value="gym">🏋 Palestra</option>
+        <option value="cardio">🚴 Cardio</option>
+        <option value="hike">🥾 Escursione</option>
+      </select>
+    </div>
+    <div id="tpl-ex-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="label" style="margin:0">Esercizi nella scheda</div>
+        <button class="btn btn-ghost btn-sm" onclick="openAddExToTpl()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Aggiungi
+        </button>
+      </div>
+      <div id="tpl-ex-build-list" style="margin-bottom:8px"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeSheet('sh-tpl-edit')">Annulla</button>
+      <button class="btn btn-primary" onclick="saveTemplate()">Salva scheda</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHEET: ADD EX TO TEMPLATE -->
+<div class="sheet-overlay" id="sh-tpl-add-ex">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 style="margin-bottom:14px">Aggiungi esercizio alla scheda</h3>
+    <div class="field">
+      <label>Esercizio</label>
+      <select id="tpl-ex-sel">
+        <option value="">— Seleziona —</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Serie previste</label>
+      <select id="tpl-sets-n">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3" selected>3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeSheet('sh-tpl-add-ex')">Annulla</button>
+      <button class="btn btn-primary" onclick="confirmExToTpl()">Aggiungi</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHEET: START TEMPLATE (workout from template) -->
+<div class="sheet-overlay" id="sh-tpl-start">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="sh-tpl-start-body"></div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:14px">
+      <button class="btn btn-ghost" onclick="closeSheet('sh-tpl-start')">Annulla</button>
+      <button class="btn btn-primary" id="sh-tpl-start-btn">Inizia allenamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHEET: INSTALL GUIDE -->
+<div class="sheet-overlay" id="sh-install">
+  <div class="sheet" style="max-height:92vh;overflow-y:auto">
+    <div class="sheet-handle"></div>
+    <h3 style="margin-bottom:4px">📲 Installa l'app</h3>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Scegli il tuo browser e segui i passaggi</div>
+
+    <!-- TAB SWITCHER -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:20px">
+      <button id="itab-android" onclick="switchInstallTab('android')"
+        style="padding:10px;border-radius:10px;border:2px solid var(--accent);background:var(--accent-bg);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer">
+        🤖 Android
+      </button>
+      <button id="itab-ios" onclick="switchInstallTab('ios')"
+        style="padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer">
+        🍎 iPhone
+      </button>
+    </div>
+
+    <!-- ANDROID STEPS -->
+    <div id="install-android">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;padding:10px;background:var(--bg3);border-radius:8px;line-height:1.6">
+        ⚠️ Se Chrome non mostra "Installa app" usa questi passi alternativi che funzionano sempre.
+      </div>
+
+      <!-- Step 1 -->
+      <div style="display:flex;gap:12px;margin-bottom:18px;align-items:flex-start">
+        <div style="min-width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff">1</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Apri il menu di Chrome</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6">Tocca i <strong style="color:var(--text)">tre puntini ⋮</strong> in alto a destra dello schermo</div>
+        </div>
+      </div>
+
+      <!-- Step 2a -->
+      <div style="display:flex;gap:12px;margin-bottom:12px;align-items:flex-start">
+        <div style="min-width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff">2</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Cerca una di queste voci</div>
+          <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-top:6px">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--accent-bg);border:1px solid rgba(79,142,247,.3);border-radius:8px;margin-bottom:8px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span style="font-size:13px;font-weight:600;color:var(--accent)">"Installa app"</span>
+              <span style="font-size:11px;color:var(--muted);margin-left:auto">← migliore</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              <span style="font-size:13px;color:var(--muted)">"Aggiungi a schermata Home"</span>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--hint);margin-top:8px;line-height:1.5">
+            "Installa app" = vera PWA (si apre senza barra browser)<br>
+            "Aggiungi a schermata Home" = scorciatoia (apre il browser)
+          </div>
+        </div>
+      </div>
+
+      <!-- Se non c'è nessuna delle due -->
+      <div style="background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:18px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--amber)">⚡ Se non vedi nessuna delle due voci:</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          1. Chiudi Chrome completamente<br>
+          2. Riapri e visita il link <strong style="color:var(--text)">3-4 volte</strong> in giorni diversi<br>
+          3. Oppure prova con <strong style="color:var(--text)">Samsung Internet</strong> o <strong style="color:var(--text)">Firefox</strong>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div style="display:flex;gap:12px;margin-bottom:18px;align-items:flex-start">
+        <div style="min-width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff">3</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Conferma l'installazione</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6">Tocca <strong style="color:var(--text)">"Installa"</strong> o <strong style="color:var(--text)">"Aggiungi"</strong> nel popup che appare. L'icona apparirà sulla schermata Home.</div>
+        </div>
+      </div>
+
+      <!-- Link box -->
+      <div style="background:var(--accent-bg);border:1px solid rgba(79,142,247,.25);border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">🔗 Link dell'app (tienilo salvato):</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--accent);word-break:break-all;margin-bottom:10px">https://t-ivan2.github.io/Workout-Toubkal/</div>
+        <button class="btn btn-ghost btn-sm btn-block" onclick="copyLink()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copia link
+        </button>
+      </div>
+    </div>
+
+    <!-- iOS STEPS -->
+    <div id="install-ios" style="display:none">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;padding:10px;background:var(--bg3);border-radius:8px;line-height:1.6">
+        ⚠️ Su iPhone funziona <strong style="color:var(--text)">solo con Safari</strong>. Chrome e altri browser non supportano l'installazione PWA su iOS.
+      </div>
+
+      <div style="display:flex;gap:12px;margin-bottom:18px;align-items:flex-start">
+        <div style="min-width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff">1</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Apri Safari</div>
+          <div style="font-size:13px;color:var(--muted)">Vai su <span style="font-family:var(--mono);color:var(--accent);font-size:11px">t-ivan2.github.io/Workout-Toubkal/</span></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-bottom:18px;align-items:flex-start">
+        <div style="min-width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff">2</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Tocca Condividi</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6">L'icona <strong style="color:var(--text)">□↑</strong> in fondo alla barra di Safari (quadrato con freccia verso l'alto)</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-bottom:18px;align-items:flex-start">
+        <div style="min-width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff">3</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Aggiungi a schermata Home</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6">Scorri il menu e tocca <strong style="color:var(--text)">"Aggiungi a schermata Home"</strong> poi <strong style="color:var(--text)">Aggiungi</strong></div>
+        </div>
+      </div>
+
+      <div style="background:var(--accent-bg);border:1px solid rgba(79,142,247,.25);border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">🔗 Link dell'app:</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--accent);word-break:break-all;margin-bottom:10px">https://t-ivan2.github.io/Workout-Toubkal/</div>
+        <button class="btn btn-ghost btn-sm btn-block" onclick="copyLink()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copia link
+        </button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="closeSheet('sh-install')">Ho capito, chiudi</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const TOUBKAL = new Date('2026-09-06');
+const STORAGE_KEY = 'wt2_data';
+const DEFAULT_EX = [
+  {id:'e1',name:'Squat con bilanciere',cat:'gambe',unit:'kg'},
+  {id:'e2',name:'Stacco da terra',cat:'gambe',unit:'kg'},
+  {id:'e3',name:'Affondi bulgari',cat:'gambe',unit:'kg'},
+  {id:'e4',name:'Step-up con manubri',cat:'gambe',unit:'kg'},
+  {id:'e5',name:'Hip thrust',cat:'gambe',unit:'kg'},
+  {id:'e6',name:'Leg press',cat:'gambe',unit:'kg'},
+  {id:'e7',name:'Rematori bilanciere',cat:'schiena',unit:'kg'},
+  {id:'e8',name:'Lat machine',cat:'schiena',unit:'kg'},
+  {id:'e9',name:'Trazioni',cat:'schiena',unit:'bw'},
+  {id:'e10',name:'Arnold press',cat:'spalle',unit:'kg'},
+  {id:'e11',name:'Face pull',cat:'spalle',unit:'kg'},
+  {id:'e12',name:'Press panca',cat:'petto',unit:'kg'},
+  {id:'e13',name:'Plank',cat:'core',unit:'bw'},
+  {id:'e14',name:'Dead bug',cat:'core',unit:'bw'},
+  {id:'e15',name:'Farmer carry',cat:'core',unit:'kg'},
+  {id:'e16',name:'Kettlebell swing',cat:'full',unit:'kg'},
+  {id:'e17',name:'Turkish get-up',cat:'full',unit:'kg'},
+];
+
+let D = {exercises: [], workouts: [], templates: []};
+let logExs = [];
+let tplExs = []; // esercizi in costruzione per la scheda
+let editingTplId = null;
+let currentFilter = 'all';
+
+// Carica dati da localStorage
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      D.exercises = p.exercises?.length ? p.exercises : DEFAULT_EX;
+      D.workouts = p.workouts || [];
+      D.templates = p.templates || [];
+    } else {
+      D.exercises = DEFAULT_EX;
+    }
+  } catch(e) { D.exercises = DEFAULT_EX; }
+}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(D)); } catch(e) {}
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// Navigation
+function nav(s) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('s-'+s).classList.add('active');
+  document.getElementById('nb-'+s).classList.add('active');
+  if (s==='home') updateHome();
+  if (s==='history') renderHistory();
+  if (s==='progress') { fillProgSel(); renderVol(); renderHikeChart(); }
+  if (s==='exercises') renderExList();
+  if (s==='templates') renderTemplates();
+  if (s==='settings') {
+    document.getElementById('set-total').textContent = D.workouts.length + ' sessioni registrate';
+    renderDatiExList();
+  }
+}
+
+function openSheet(id) { document.getElementById(id).classList.add('open'); }
+function closeSheet(id) { document.getElementById(id).classList.remove('open'); }
+
+// ---- HOME ----
+function updateHome() {
+  const now = new Date();
+  const h = now.getHours();
+  document.getElementById('home-title').textContent = h < 12 ? 'Buongiorno' : h < 18 ? 'Buon pomeriggio' : 'Buonasera';
+  const diff = Math.ceil((TOUBKAL - now) / 86400000);
+  document.getElementById('days-left').textContent = diff > 0 ? diff : '—';
+  document.getElementById('home-sub').textContent = 'Toubkal ' + TOUBKAL.toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'});
+  const mStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const wStart = new Date(now); wStart.setDate(now.getDate() - now.getDay());
+  document.getElementById('stat-month').textContent = D.workouts.filter(w => new Date(w.date) >= mStart).length;
+  document.getElementById('stat-week').textContent = D.workouts.filter(w => new Date(w.date) >= wStart).length;
+  const hikes = D.workouts.filter(w => w.type==='hike').length;
+  document.getElementById('stat-hikes').textContent = hikes;
+  document.getElementById('hike-prog-txt').textContent = hikes + ' / 13';
+  document.getElementById('hike-pbar').style.width = Math.min(100, Math.round(hikes/13*100)) + '%';
+  // streak
+  const weeks = new Set(D.workouts.map(w=>{const d=new Date(w.date);d.setDate(d.getDate()-d.getDay());return d.toISOString().slice(0,10);}));
+  let streak=0, cur=new Date(); cur.setDate(cur.getDate()-cur.getDay());
+  while(weeks.has(cur.toISOString().slice(0,10))){streak++;cur.setDate(cur.getDate()-7);}
+  document.getElementById('stat-streak').textContent = streak;
+  // last workout
+  if (D.workouts.length) {
+    const last = [...D.workouts].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    const tl = {gym:'Palestra',cardio:'Cardio',hike:'Escursione'};
+    const tc = {gym:'tag-gym',cardio:'tag-cardio',hike:'tag-hike'};
+    let sub = last.type==='gym' ? (last.exercises||[]).map(e=>e.name).join(', ') :
+              last.type==='cardio' ? (last.duration||'—')+' min · '+(last.dist||'—')+' km' :
+              (last.duration||'—')+'h · '+(last.elev||0)+'m D+';
+    document.getElementById('last-card').innerHTML =
+      `<div class="card card-sm" style="cursor:pointer" onclick="showDetail('${last.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div><div style="font-size:15px;font-weight:500">${last.name}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${sub}</div></div>
+          <span class="tag ${tc[last.type]}">${tl[last.type]}</span>
+        </div>
+        <div style="font-size:11px;color:var(--hint);margin-top:8px">${fmtDate(last.date)}</div>
+      </div>`;
+  }
+}
+
+// ---- LOG ----
+function switchType() {
+  const t = document.getElementById('log-type').value;
+  document.getElementById('log-gym').style.display = t==='gym' ? 'block' : 'none';
+  document.getElementById('log-cardio').style.display = t==='cardio' ? 'block' : 'none';
+  document.getElementById('log-hike').style.display = t==='hike' ? 'block' : 'none';
+}
+
+function openAddEx() {
+  // populate select
+  const sel = document.getElementById('sh-ex-sel');
+  sel.innerHTML = '<option value="">— Seleziona —</option>' + D.exercises.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  buildSets();
+  openSheet('sh-add-ex');
+}
+
+function buildSets() {
+  const n = parseInt(document.getElementById('sh-sets-n').value)||3;
+  const exId = document.getElementById('sh-ex-sel').value;
+  // find last session for this exercise for autofill hints
+  let hint = null;
+  if (exId) {
+    const sessions = D.workouts.filter(w=>w.type==='gym' && (w.exercises||[]).some(e=>e.id===exId))
+      .sort((a,b)=>new Date(b.date)-new Date(a.date));
+    if (sessions.length) {
+      const ex = sessions[0].exercises.find(e=>e.id===exId);
+      if (ex?.sets?.length) hint = ex.sets[0];
+    }
+  }
+  let html = '';
+  for (let i=0;i<n;i++) {
+    html += `<div class="set-grid">
+      <span class="set-num">${i+1}</span>
+      <input type="number" id="sw-${i}" placeholder="${hint?.weight||'kg'}" step="0.5" ${hint&&i===0?'value="'+hint.weight+'"':''}>
+      <input type="number" id="sr-${i}" placeholder="${hint?.reps||'rip'}" ${hint&&i===0?'value="'+hint.reps+'"':''}>
+      <button class="copy-btn" onclick="copyDown(${i})" title="Copia verso il basso">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>`;
+  }
+  document.getElementById('sets-container').innerHTML = html;
+}
+
+function copyDown(i) {
+  const w = document.getElementById('sw-'+i)?.value;
+  const r = document.getElementById('sr-'+i)?.value;
+  const n = parseInt(document.getElementById('sh-sets-n').value)||3;
+  for (let j=i+1;j<n;j++) {
+    if (w) document.getElementById('sw-'+j).value = w;
+    if (r) document.getElementById('sr-'+j).value = r;
+  }
+}
+
+function confirmEx() {
+  const exId = document.getElementById('sh-ex-sel').value;
+  if (!exId) { toast('Seleziona un esercizio'); return; }
+  const ex = D.exercises.find(e=>e.id===exId);
+  const n = parseInt(document.getElementById('sh-sets-n').value)||3;
+  const sets = Array.from({length:n},(_,i)=>({weight:document.getElementById('sw-'+i)?.value||'',reps:document.getElementById('sr-'+i)?.value||''}));
+  const sheet = document.getElementById('sh-add-ex');
+  const editIdx = sheet.dataset.editIdx !== undefined && sheet.dataset.editIdx !== '' ? parseInt(sheet.dataset.editIdx) : -1;
+  if (editIdx >= 0) {
+    logExs[editIdx] = {id:exId, name:ex.name, sets};
+  } else {
+    const idx = logExs.findIndex(e=>e.id===exId);
+    if (idx>=0) logExs[idx] = {id:exId,name:ex.name,sets};
+    else logExs.push({id:exId,name:ex.name,sets});
+  }
+  resetAddExSheet();
+  renderLogExs();
+  closeSheet('sh-add-ex');
+}
+
+function resetAddExSheet() {
+  const sheet = document.getElementById('sh-add-ex');
+  delete sheet.dataset.editIdx;
+  sheet.querySelector('h3').textContent = 'Aggiungi esercizio';
+  sheet.querySelector('.btn-primary').textContent = 'Aggiungi';
+}
+
+function renderLogExs() {
+  const el = document.getElementById('log-ex-list');
+  if (!logExs.length) { el.innerHTML='<div class="empty" style="padding:20px"><svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12"/></svg>Nessun esercizio</div>'; return; }
+  el.innerHTML = logExs.map((ex,i)=>`
+    <div class="card card-sm" style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:14px;font-weight:500">${ex.name}</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="editEx(${i})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Modifica
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="removeEx(${i})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>
+        </div>
+      </div>
+      ${ex.sets.map((s,j)=>`<div style="font-size:12px;color:var(--muted);padding:2px 0">Serie ${j+1}: <span class="mono">${s.weight||'—'} ${s.weight?'kg':''} × ${s.reps||'—'}</span></div>`).join('')}
+    </div>`).join('');
+}
+
+function removeEx(i) {
+  if (!confirm(`Eliminare l'esercizio "${logExs[i].name}"?`)) return;
+  logExs.splice(i,1); renderLogExs();
+}
+
+function editEx(i) {
+  const ex = logExs[i];
+  const sel = document.getElementById('sh-ex-sel');
+  sel.innerHTML = '<option value="">— Seleziona —</option>' + D.exercises.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  sel.value = ex.id;
+  document.getElementById('sh-sets-n').value = ex.sets.length;
+  document.getElementById('sh-add-ex').dataset.editIdx = i;
+  document.querySelector('#sh-add-ex h3').textContent = 'Modifica esercizio';
+  document.querySelector('#sh-add-ex .btn-primary').textContent = 'Salva modifiche';
+  // Build set inputs pre-filled with current values
+  let html = '';
+  ex.sets.forEach((s,idx)=>{
+    html += `<div class="set-grid">
+      <span class="set-num">${idx+1}</span>
+      <input type="number" id="sw-${idx}" placeholder="kg" step="0.5" value="${s.weight||''}">
+      <input type="number" id="sr-${idx}" placeholder="rip" value="${s.reps||''}">
+      <button class="copy-btn" onclick="copyDown(${idx})" title="Copia verso il basso">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>`;
+  });
+  document.getElementById('sets-container').innerHTML = html;
+  openSheet('sh-add-ex');
+}
+
+function saveWorkout() {
+  const type = document.getElementById('log-type').value;
+  const name = document.getElementById('log-name').value.trim() || (type==='gym'?'Palestra':type==='cardio'?'Cardio':'Escursione');
+  const date = document.getElementById('log-date').value;
+  if (!date) { toast('Inserisci la data'); return; }
+  if (type==='gym' && !logExs.length) { toast('Aggiungi almeno un esercizio'); return; }
+  const id = 'w' + Date.now();
+  let w = {id, type, name, date};
+  if (type==='gym') {
+    w.exercises = JSON.parse(JSON.stringify(logExs));
+  } else if (type==='cardio') {
+    w.duration = document.getElementById('c-dur').value;
+    w.dist = document.getElementById('c-dist').value;
+    w.elev = document.getElementById('c-elev').value;
+    w.hr = document.getElementById('c-hr').value;
+    w.packWeight = document.getElementById('c-pack').value;
+    w.notes = document.getElementById('c-notes').value;
+  } else {
+    w.duration = document.getElementById('h-dur').value;
+    w.dist = document.getElementById('h-dist').value;
+    w.elev = document.getElementById('h-elev').value;
+    w.alt = document.getElementById('h-alt').value;
+    w.packWeight = document.getElementById('h-pack').value;
+    w.feel = document.getElementById('h-feel').value;
+    w.notes = document.getElementById('h-notes').value;
+  }
+  D.workouts.push(w);
+  save();
+  // reset
+  logExs = [];
+  document.getElementById('log-name').value = '';
+  document.getElementById('log-type').value = 'gym';
+  switchType();
+  renderLogExs();
+  ['c-dur','c-dist','c-elev','c-hr','c-pack','c-notes','h-dur','h-dist','h-elev','h-alt','h-pack','h-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('h-feel').value='3';
+  toast('Allenamento salvato!');
+  nav('home');
+}
+
+// ---- HISTORY ----
+function setFilter(f) {
+  currentFilter = f;
+  ['all','gym','cardio','hike'].forEach(k=>{
+    document.getElementById('fp-'+k).classList.toggle('active', k===f);
+  });
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('hist-list');
+  let ws = [...D.workouts].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if (currentFilter !== 'all') ws = ws.filter(w=>w.type===currentFilter);
+  if (!ws.length) { list.innerHTML='<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Nessun allenamento</div>'; return; }
+  const tl={gym:'Palestra',cardio:'Cardio',hike:'Escursione'};
+  const tc={gym:'tag-gym',cardio:'tag-cardio',hike:'tag-hike'};
+  const card = document.createElement('div');
+  card.className = 'card'; card.style.padding='0 16px';
+  card.innerHTML = ws.map(w=>{
+    let sub = w.type==='gym' ? (w.exercises||[]).map(e=>e.name).join(', ') :
+              w.type==='cardio' ? (w.duration||'—')+' min · '+(w.dist||'—')+' km'+(w.elev?' · '+w.elev+'m D+':'') :
+              (w.duration||'—')+'h · '+(w.dist||'—')+' km · '+(w.elev||0)+'m D+';
+    return `<div class="hist-item" onclick="showDetail('${w.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="hist-date">${fmtDate(w.date)}</div>
+          <div class="hist-name">${w.name}</div>
+          <div class="hist-sub">${sub}</div>
+        </div>
+        <span class="tag ${tc[w.type]}">${tl[w.type]}</span>
+      </div>
+    </div>`;
+  }).join('');
+  list.innerHTML = ''; list.appendChild(card);
+}
+
+function showDetail(id) {
+  const w = D.workouts.find(x=>x.id===id); if(!w) return;
+  const tl={gym:'Palestra',cardio:'Cardio',hike:'Escursione'};
+  const tc={gym:'tag-gym',cardio:'tag-cardio',hike:'tag-hike'};
+  let body = `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+    <div><div style="font-size:17px;font-weight:500">${w.name}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${fmtDate(w.date)}</div></div>
+    <span class="tag ${tc[w.type]}">${tl[w.type]}</span>
+  </div>`;
+  if (w.type==='gym') {
+    body += (w.exercises||[]).map(ex=>`<div style="margin-bottom:12px">
+      <div style="font-size:13px;font-weight:500;color:var(--muted);margin-bottom:4px">${ex.name}</div>
+      ${(ex.sets||[]).map((s,i)=>`<div style="font-size:14px;padding:3px 0"><span style="color:var(--hint)">S${i+1}</span> <span class="mono">${s.weight||'—'}${s.weight?' kg':''} × ${s.reps||'—'}</span></div>`).join('')}
+    </div>`).join('');
+  } else {
+    const rows = w.type==='cardio'
+      ? [['Durata',w.duration,'min'],['Distanza',w.dist,'km'],['Dislivello',w.elev,'m'],['FC media',w.hr,'bpm'],['Zaino',w.packWeight,'kg']]
+      : [['Durata',w.duration,'h'],['Distanza',w.dist,'km'],['Dislivello',w.elev,'m'],['Quota max',w.alt,'m'],['Zaino',w.packWeight,'kg']];
+    body += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
+      rows.filter(r=>r[1]).map(r=>`<div class="metric" style="padding:10px 12px"><div class="label">${r[0]}</div><div class="metric-val" style="font-size:20px">${r[1]}<small style="font-size:12px;color:var(--muted)"> ${r[2]}</small></div></div>`).join('') + '</div>';
+    if (w.type==='hike' && w.feel) {
+      const feels={1:'Molto dura',2:'Faticosa',3:'Nella media',4:'Buona',5:'Ottima'};
+      body += `<div style="font-size:13px;color:var(--muted);margin-bottom:8px">Sensazione: <strong style="color:var(--text)">${feels[w.feel]}</strong></div>`;
+    }
+    if (w.notes) body += `<div style="font-size:13px;color:var(--muted);line-height:1.6;padding:10px;background:var(--bg3);border-radius:8px">${w.notes}</div>`;
+  }
+  document.getElementById('sh-detail-body').innerHTML = body;
+  document.getElementById('sh-del-btn').onclick = () => { deleteW(id); closeSheet('sh-detail'); };
+  openSheet('sh-detail');
+}
+
+function deleteW(id) {
+  if (!confirm('Eliminare questo allenamento? L\'operazione non può essere annullata.')) return;
+  D.workouts = D.workouts.filter(w=>w.id!==id);
+  save(); updateHome(); renderHistory(); renderExList(); toast('Allenamento eliminato');
+}
+
+// ---- EXERCISES ----
+function renderExList() {
+  const el = document.getElementById('ex-list');
+   const cats = {
+  gambe:'Gambe',
+  schiena:'Schiena',
+  petto:'Petto',
+  spalle:'Spalle',
+  bicipiti:'Bicipiti',
+  tricipiti:'Tricipiti',
+  avambracci:'Avambracci',
+  polpacci:'Polpacci',
+  core:'Core',
+  full:'Full body'
+};
+  const grouped = {};
+  D.exercises.forEach(e=>{ (grouped[e.cat]||(grouped[e.cat]=[])).push(e); });
+  el.innerHTML = Object.entries(grouped).map(([cat,exs])=>`
+    <div class="label" style="margin-top:16px">${cats[cat]||cat}</div>
+    <div class="card" style="padding:0 16px">
+    ${exs.map(e=>{
+      const pr = getPR(e.id);
+      const sess = D.workouts.filter(w=>w.type==='gym'&&(w.exercises||[]).some(ex=>ex.id===e.id)).length;
+      return `<div class="ex-row">
+        <div><div class="ex-row-name">${e.name}</div><div class="ex-row-sub">${sess} sess.</div></div>
+        ${pr ? `<span class="pr-badge">${pr.w}kg × ${pr.r}</span>` : '<span style="font-size:11px;color:var(--hint)">—</span>'}
+      </div>`;
+    }).join('')}
+    </div>`).join('');
+}
+
+function getPR(exId) {
+  let best = null;
+  D.workouts.forEach(w=>{
+    if(w.type!=='gym') return;
+    (w.exercises||[]).forEach(ex=>{
+      if(ex.id!==exId) return;
+      (ex.sets||[]).forEach(s=>{
+        if(!s.weight||!s.reps) return;
+        const val = parseFloat(s.weight);
+        if(!best || val > parseFloat(best.w) || (val===parseFloat(best.w) && parseInt(s.reps)>parseInt(best.r)))
+          best={w:val.toFixed(1).replace('.0',''), r:s.reps};
+      });
+    });
+  });
+  return best;
+}
+
+function openNewEx() {
+  document.getElementById('ne-name').value='';
+  openSheet('sh-new-ex');
+}
+
+function saveNewEx() {
+  const name = document.getElementById('ne-name').value.trim();
+  if(!name){ toast('Inserisci un nome'); return; }
+  D.exercises.push({id:'e'+Date.now(), name, cat:document.getElementById('ne-cat').value, unit:document.getElementById('ne-unit').value});
+  save(); closeSheet('sh-new-ex'); renderExList(); renderDatiExList();
+  // refresh selects
+  toast('Esercizio aggiunto!');
+}
+
+// ---- ESERCIZI IN TAB DATI ----
+function renderDatiExList() {
+  const el = document.getElementById('dati-ex-list');
+  if (!el) return;
+  const cats = {gambe:'Gambe',schiena:'Schiena',petto:'Petto',spalle:'Spalle',core:'Core',full:'Full body'};
+  const grouped = {};
+  D.exercises.forEach(e=>{ (grouped[e.cat]||(grouped[e.cat]=[])).push(e); });
+  el.innerHTML = Object.entries(grouped).map(([cat,exs])=>`
+    <div style="margin-bottom:10px">
+      <div class="label" style="margin-bottom:4px">${cats[cat]||cat}</div>
+      ${exs.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px">${e.name}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--hint)">${e.unit==='bw'?'corpo libero':'kg'}</span>
+          <button onclick="deleteEx('${e.id}')" style="background:none;border:none;color:var(--hint);cursor:pointer;padding:2px;display:flex">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>
+        </div>
+      </div>`).join('')}
+    </div>`).join('');
+}
+
+function deleteEx(id) {
+  if (!confirm('Eliminare questo esercizio?')) return;
+  D.exercises = D.exercises.filter(e=>e.id!==id);
+  save(); renderDatiExList(); renderExList(); toast('Esercizio eliminato');
+}
+
+// ---- SCHEDE / TEMPLATES ----
+function renderTemplates() {
+  const el = document.getElementById('tpl-list');
+  if (!D.templates.length) {
+    el.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Nessuna scheda. Creane una!</div>';
+    return;
+  }
+  const tl={gym:'Palestra',cardio:'Cardio',hike:'Escursione'};
+  const tc={gym:'tag-gym',cardio:'tag-cardio',hike:'tag-hike'};
+  el.innerHTML = D.templates.map(t=>`
+    <div class="tpl-card">
+      <div class="tpl-card-header">
+        <div>
+          <div class="tpl-name">${t.name}</div>
+          <div class="tpl-sub">${t.type==='gym'?(t.exercises||[]).length+' esercizi':tl[t.type]}</div>
+        </div>
+        <span class="tag ${tc[t.type]}">${tl[t.type]}</span>
+      </div>
+      ${t.type==='gym' && t.exercises?.length ? '<div>'+t.exercises.map(e=>`<span class="tpl-ex-chip">${e.name} ×${e.sets}</span>`).join('')+'</div>' : ''}
+      <div class="tpl-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editTemplate('${t.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Modifica
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTpl('${t.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+          Elimina
+        </button>
+        <button class="btn btn-primary btn-sm" style="flex:1" onclick="startTemplate('${t.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Inizia
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+function openNewTemplate() {
+  editingTplId = null;
+  tplExs = [];
+  document.getElementById('tpl-name-inp').value = '';
+  document.getElementById('tpl-type-sel').value = 'gym';
+  document.getElementById('tpl-edit-title').textContent = 'Nuova scheda';
+  renderTplExBuild();
+  updateTplExSection();
+  openSheet('sh-tpl-edit');
+}
+
+function editTemplate(id) {
+  const t = D.templates.find(x=>x.id===id); if(!t) return;
+  editingTplId = id;
+  tplExs = JSON.parse(JSON.stringify(t.exercises||[]));
+  document.getElementById('tpl-name-inp').value = t.name;
+  document.getElementById('tpl-type-sel').value = t.type;
+  document.getElementById('tpl-edit-title').textContent = 'Modifica scheda';
+  renderTplExBuild();
+  updateTplExSection();
+  openSheet('sh-tpl-edit');
+}
+
+
+function updateTplExSection() {
+  const t = document.getElementById('tpl-type-sel')?.value;
+  const sec = document.getElementById('tpl-ex-section');
+  if (sec) sec.style.display = t==='gym' ? 'block' : 'none';
+}
+
+function renderTplExBuild() {
+  const el = document.getElementById('tpl-ex-build-list');
+  if (!tplExs.length) { el.innerHTML='<div style="font-size:13px;color:var(--hint);padding:6px 0">Nessun esercizio aggiunto</div>'; return; }
+  el.innerHTML = tplExs.map((e,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <span style="font-size:13px;font-weight:500">${e.name}</span>
+        <span style="font-size:12px;color:var(--muted);margin-left:8px">${e.sets} serie</span>
+      </div>
+      <button onclick="removeTplEx(${i})" style="background:none;border:none;color:var(--hint);cursor:pointer;display:flex;padding:4px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function removeTplEx(i) {
+  if (!confirm(`Rimuovere "${tplExs[i].name}" dalla scheda?`)) return;
+  tplExs.splice(i,1); renderTplExBuild();
+}
+
+function openAddExToTpl() {
+  const sel = document.getElementById('tpl-ex-sel');
+  sel.innerHTML = '<option value="">— Seleziona —</option>' + D.exercises.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  document.getElementById('tpl-sets-n').value = '3';
+  openSheet('sh-tpl-add-ex');
+}
+
+function confirmExToTpl() {
+  const exId = document.getElementById('tpl-ex-sel').value;
+  if (!exId) { toast('Seleziona un esercizio'); return; }
+  const ex = D.exercises.find(e=>e.id===exId);
+  const sets = parseInt(document.getElementById('tpl-sets-n').value)||3;
+  const idx = tplExs.findIndex(e=>e.id===exId);
+  if (idx>=0) tplExs[idx].sets = sets;
+  else tplExs.push({id:exId, name:ex.name, sets});
+  renderTplExBuild();
+  closeSheet('sh-tpl-add-ex');
+}
+
+function saveTemplate() {
+  const name = document.getElementById('tpl-name-inp').value.trim();
+  if (!name) { toast('Inserisci un nome per la scheda'); return; }
+  const type = document.getElementById('tpl-type-sel').value;
+  if (type==='gym' && !tplExs.length) { toast('Aggiungi almeno un esercizio'); return; }
+  if (editingTplId) {
+    const t = D.templates.find(x=>x.id===editingTplId);
+    if (t) { t.name=name; t.type=type; t.exercises=JSON.parse(JSON.stringify(tplExs)); }
+  } else {
+    D.templates.push({id:'t'+Date.now(), name, type, exercises:JSON.parse(JSON.stringify(tplExs))});
+  }
+  save(); closeSheet('sh-tpl-edit'); renderTemplates(); toast('Scheda salvata!');
+}
+
+function deleteTpl(id) {
+  if (!confirm('Eliminare questa scheda?')) return;
+  D.templates = D.templates.filter(t=>t.id!==id);
+  save(); renderTemplates(); toast('Scheda eliminata');
+}
+
+function startTemplate(id) {
+  const t = D.templates.find(x=>x.id===id); if(!t) return;
+  const tl={gym:'Palestra',cardio:'Cardio',hike:'Escursione'};
+  const tc={gym:'tag-gym',cardio:'tag-cardio',hike:'tag-hike'};
+  let body = `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+    <div>
+      <div style="font-size:17px;font-weight:500">${t.name}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">Avvia come nuovo allenamento</div>
+    </div>
+    <span class="tag ${tc[t.type]}">${tl[t.type]}</span>
+  </div>`;
+  if (t.type==='gym' && t.exercises?.length) {
+    body += '<div class="label">Esercizi inclusi</div>';
+    body += t.exercises.map(e=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px">${e.name}</span>
+      <span style="font-size:12px;color:var(--muted)">${e.sets} serie</span>
+    </div>`).join('');
+    body += '<div style="font-size:12px;color:var(--muted);margin-top:10px">Potrai modificare pesi, reps e aggiungere esercizi durante l\'allenamento.</div>';
+  }
+  document.getElementById('sh-tpl-start-body').innerHTML = body;
+  document.getElementById('sh-tpl-start-btn').onclick = () => { closeSheet('sh-tpl-start'); loadTemplateToLog(t); };
+  openSheet('sh-tpl-start');
+}
+
+function loadTemplateToLog(t) {
+  // Precarica la scheda nella tab Registra
+  document.getElementById('log-type').value = t.type;
+  document.getElementById('log-name').value = t.name;
+  document.getElementById('log-date').value = new Date().toISOString().slice(0,10);
+  switchType();
+  logExs = [];
+  if (t.type==='gym' && t.exercises?.length) {
+    t.exercises.forEach(te=>{
+      const ex = D.exercises.find(e=>e.id===te.id);
+      if (!ex) return;
+      // Try to prefill with last session weights
+      const lastSess = D.workouts.filter(w=>w.type==='gym'&&(w.exercises||[]).some(e=>e.id===te.id))
+        .sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+      let sets = [];
+      if (lastSess) {
+        const lastEx = lastSess.exercises.find(e=>e.id===te.id);
+        if (lastEx?.sets) sets = lastEx.sets.slice(0, te.sets).map(s=>({weight:s.weight,reps:s.reps}));
+      }
+      while (sets.length < te.sets) sets.push({weight:'',reps:''});
+      logExs.push({id:te.id, name:ex.name, sets});
+    });
+  }
+  renderLogExs();
+  nav('log');
+  toast('Scheda caricata! Puoi aggiungere esercizi.');
+}
+
+// ---- PROGRESS ----
+let progChart, volChart, hikeChart;
+
+function fillProgSel() {
+  const sel = document.getElementById('prog-sel');
+  const used = new Set();
+  D.workouts.forEach(w=>{ if(w.type==='gym') (w.exercises||[]).forEach(e=>used.add(e.id)); });
+  sel.innerHTML = '<option value="">— Seleziona esercizio —</option>' +
+    D.exercises.filter(e=>used.has(e.id)).map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+}
+
+function renderProg() {
+  const exId = document.getElementById('prog-sel').value;
+  const wrap = document.getElementById('prog-stats');
+  if (!exId) { wrap.style.display='none'; return; }
+  const sessions = D.workouts.filter(w=>w.type==='gym')
+    .sort((a,b)=>new Date(a.date)-new Date(b.date))
+    .map(w=>{ const ex=(w.exercises||[]).find(e=>e.id===exId); if(!ex) return null;
+      const vals=(ex.sets||[]).filter(s=>s.weight).map(s=>parseFloat(s.weight));
+      return vals.length ? {date:w.date, max:Math.max(...vals)} : null; }).filter(Boolean);
+  if (!sessions.length) { wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  const pr = Math.max(...sessions.map(s=>s.max));
+  const last = sessions[sessions.length-1].max;
+  document.getElementById('p-pr').textContent = 'PR ' + pr.toFixed(1).replace('.0','') + ' kg';
+  document.getElementById('p-last').textContent = 'Ultima ' + last.toFixed(1).replace('.0','') + ' kg';
+  document.getElementById('p-sess').textContent = sessions.length + ' sess.';
+  const ctx = document.getElementById('prog-chart').getContext('2d');
+  if (progChart) progChart.destroy();
+  progChart = new Chart(ctx, {
+    type:'line',
+    data:{labels:sessions.map(s=>s.date.slice(5)),datasets:[{data:sessions.map(s=>parseFloat(s.max.toFixed(1))),borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,.12)',tension:.35,fill:true,pointRadius:4,pointBackgroundColor:'#4f8ef7'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#7a7f8e',font:{size:11}}},x:{grid:{display:false},ticks:{color:'#7a7f8e',font:{size:10},maxTicksLimit:6}}}}
+  });
+}
+
+function renderVol() {
+  const ctx = document.getElementById('vol-chart').getContext('2d');
+  if (volChart) volChart.destroy();
+  const weeks = {};
+  D.workouts.forEach(w=>{
+    const d=new Date(w.date); d.setDate(d.getDate()-d.getDay());
+    const k=d.toISOString().slice(5,10);
+    if(!weeks[k]) weeks[k]={gym:0,cardio:0,hike:0};
+    weeks[k][w.type]++;
+  });
+  const labels = Object.keys(weeks).sort().slice(-8);
+  if (!labels.length) { document.getElementById('vol-chart').parentElement.innerHTML='<div style="font-size:13px;color:var(--muted);padding:10px 0">Nessun dato ancora</div>'; return; }
+  volChart = new Chart(ctx, {
+    type:'bar',
+    data:{labels, datasets:[
+      {label:'Palestra',data:labels.map(k=>weeks[k]?.gym||0),backgroundColor:'#4f8ef7',borderRadius:4},
+      {label:'Cardio',data:labels.map(k=>weeks[k]?.cardio||0),backgroundColor:'#34c78a',borderRadius:4},
+      {label:'Esc.',data:labels.map(k=>weeks[k]?.hike||0),backgroundColor:'#f0a040',borderRadius:4},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7a7f8e',font:{size:11},boxWidth:10}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#7a7f8e',font:{size:10}}},y:{stacked:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#7a7f8e',font:{size:11},stepSize:1}}}}
+  });
+}
+
+function renderHikeChart() {
+  const ctx = document.getElementById('hike-chart').getContext('2d');
+  if (hikeChart) hikeChart.destroy();
+  const hikes = D.workouts.filter(w=>(w.type==='hike'||w.type==='cardio')&&w.elev).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(-12);
+  if (!hikes.length) { document.getElementById('hike-chart').parentElement.innerHTML='<div style="font-size:13px;color:var(--muted);padding:10px 0">Nessun dato ancora</div>'; return; }
+  hikeChart = new Chart(ctx, {
+    type:'bar',
+    data:{labels:hikes.map(h=>h.date.slice(5)),datasets:[{data:hikes.map(h=>parseInt(h.elev)),backgroundColor:'#f0a040',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#7a7f8e',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#7a7f8e',font:{size:11}}}}}
+  });
+}
+
+// ---- EXPORT ----
+function filterByPeriod(ws) {
+  const period = document.getElementById('exp-period').value;
+  if (period==='all') return ws;
+  const now = new Date();
+  const from = new Date(now);
+  if (period==='month') from.setMonth(from.getMonth()-1);
+  else if (period==='3m') from.setMonth(from.getMonth()-3);
+  else if (period==='year') from.setFullYear(from.getFullYear()-1);
+  return ws.filter(w=>new Date(w.date)>=from);
+}
+
+function doExport(fmt) {
+  const type = document.getElementById('exp-type').value;
+  let data, filename;
+  if (type==='exercises') {
+    data = D.exercises;
+    filename = 'esercizi';
+  } else {
+    let ws = filterByPeriod(D.workouts);
+    if (type!=='all') ws = ws.filter(w=>w.type===type);
+    data = ws;
+    filename = type==='all' ? 'allenamenti' : type;
+  }
+  if (!data.length) { toast('Nessun dato da esportare'); return; }
+
+  let blob, ext;
+  if (fmt==='json') {
+    blob = new Blob([JSON.stringify({exported: new Date().toISOString(), count: data.length, data}, null, 2)], {type:'application/json'});
+    ext = 'json';
+  } else {
+    // CSV
+    let csv;
+    if (type==='exercises') {
+      csv = 'id,nome,categoria,unita\n' + data.map(e=>[e.id,qq(e.name),e.cat,e.unit].join(',')).join('\n');
+    } else if (type==='gym' || (type==='all' && data.some(w=>w.type==='gym'))) {
+      const rows = [];
+      rows.push('data,sessione,esercizio,serie,peso_kg,ripetizioni');
+      data.forEach(w=>{
+        if (w.type==='gym') {
+          (w.exercises||[]).forEach(ex=>{
+            (ex.sets||[]).forEach((s,i)=>rows.push([w.date,qq(w.name),qq(ex.name),i+1,s.weight||'',s.reps||''].join(',')));
+          });
+        } else {
+          rows.push([w.date,qq(w.name),qq(w.type),'','',''].join(','));
+        }
+      });
+      csv = rows.join('\n');
+    } else {
+      csv = 'data,nome,tipo,durata,distanza_km,dislivello_m,quota_m,zaino_kg,bpm,sensazione,note\n' +
+        data.map(w=>[w.date,qq(w.name),w.type,w.duration||'',w.dist||'',w.elev||'',w.alt||'',w.packWeight||'',w.hr||'',w.feel||'',qq(w.notes||'')].join(',')).join('\n');
+    }
+    blob = new Blob([csv], {type:'text/csv'});
+    ext = 'csv';
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `workout_${filename}_${new Date().toISOString().slice(0,10)}.${ext}`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('File scaricato!');
+}
+
+function qq(s) { return s ? '"'+String(s).replace(/"/g,'""')+'"' : ''; }
+
+function importData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      const imp = parsed.data || parsed;
+      if (Array.isArray(imp)) {
+        // check if workouts or exercises
+        if (imp[0]?.type || imp[0]?.exercises || imp[0]?.date) {
+          if (confirm(`Importare ${imp.length} allenamenti? I dati esistenti verranno mantenuti.`)) {
+            imp.forEach(w=>{ if(!D.workouts.find(x=>x.id===w.id)) D.workouts.push(w); });
+            save(); toast('Importato!'); updateHome();
+          }
+        }
+      }
+    } catch(err) { toast('File non valido'); }
+    e.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+function clearData() {
+  if (confirm('Sei sicuro? Tutti i dati verranno eliminati definitivamente.')) {
+    D.workouts=[]; save(); updateHome(); toast('Dati cancellati');
+  }
+}
+
+// ---- IN-APP UPDATE (GitHub Pages) ----
+const GH_RAW = 'https://raw.githubusercontent.com/T-Ivan2/Workout-Toubkal/main/index.html';
+const GH_COMMITS = 'https://api.github.com/repos/T-Ivan2/Workout-Toubkal/commits?path=index.html&per_page=1';
+const APP_VERSION_KEY = 'app_commit_sha';
+
+let latestSha = null;
+
+async function checkForUpdate() {
+  const statusEl = document.getElementById('update-status');
+  const versionEl = document.getElementById('app-version-label');
+  const btnArea = document.getElementById('update-btn-area');
+  statusEl.textContent = 'Connessione a GitHub in corso…';
+  btnArea.style.display = 'none';
+  try {
+    const res = await fetch(GH_COMMITS, {cache: 'no-store'});
+    if (!res.ok) throw new Error('GitHub non raggiungibile');
+    const commits = await res.json();
+    const remoteSha = commits[0]?.sha?.slice(0, 7) || '?';
+    latestSha = commits[0]?.sha;
+    const localSha = localStorage.getItem(APP_VERSION_KEY) || 'prima installazione';
+    const remoteDate = commits[0]?.commit?.committer?.date
+      ? new Date(commits[0].commit.committer.date).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})
+      : '';
+    versionEl.textContent = `Versione locale: ${localSha.slice(0,7)}`;
+    if (localSha === latestSha) {
+      statusEl.innerHTML = `<span style="color:var(--green)">✓ Sei alla versione più recente</span> (${remoteSha}, ${remoteDate})`;
+    } else {
+      statusEl.innerHTML = `<span style="color:var(--amber)">⬆ Aggiornamento disponibile</span> — versione remota: ${remoteSha} del ${remoteDate}`;
+      btnArea.style.display = 'block';
+    }
+  } catch(err) {
+    statusEl.innerHTML = `<span style="color:var(--red, #f87171)">Impossibile contattare GitHub.</span> Verifica la connessione internet.`;
+  }
+}
+
+async function applyUpdate() {
+  const statusEl = document.getElementById('update-status');
+  const btnArea = document.getElementById('update-btn-area');
+  statusEl.textContent = 'Download aggiornamento in corso…';
+  btnArea.style.display = 'none';
+  try {
+    const res = await fetch(GH_RAW, {cache: 'no-store'});
+    if (!res.ok) throw new Error('Download fallito');
+    const html = await res.text();
+    // Save the new HTML as a downloadable file so the user replaces the installed version
+    const blob = new Blob([html], {type: 'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'index.html';
+    a.click(); URL.revokeObjectURL(url);
+    if (latestSha) localStorage.setItem(APP_VERSION_KEY, latestSha);
+    statusEl.innerHTML = `<span style="color:var(--green)">✓ File scaricato!</span> Sostituisci il vecchio <strong>index.html</strong> su GitHub con questo file appena scaricato, poi ricarica l'app.`;
+    toast('Aggiornamento scaricato!');
+  } catch(err) {
+    statusEl.innerHTML = `<span style="color:var(--red,#f87171)">Download fallito.</span> Riprova più tardi.`;
+    btnArea.style.display = 'block';
+  }
+}
+
+// ---- IMPORT ESERCIZI JSON ----
+function importExercises(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      // Supporta due formati: array piatto [{name,cat,unit}] o oggetto {gruppoMuscolare: [{name,unit}]}
+      let toImport = [];
+      if (Array.isArray(parsed)) {
+        toImport = parsed;
+      } else if (typeof parsed === 'object') {
+        // formato raggruppato: { "gambe": [{name:"Squat",unit:"kg"}, ...], ... }
+        Object.entries(parsed).forEach(([cat, exs]) => {
+          if (Array.isArray(exs)) exs.forEach(ex => toImport.push({...ex, cat}));
+        });
+      }
+      // Valida e pulisci
+      const valid = toImport.filter(ex => ex.name && typeof ex.name === 'string');
+      if (!valid.length) { toast('Nessun esercizio valido nel file'); return; }
+      let added = 0;
+      valid.forEach(ex => {
+        const name = ex.name.trim();
+        const cat = ex.cat || ex.category || 'full';
+        const unit = ex.unit === 'bw' ? 'bw' : 'kg';
+        if (!D.exercises.find(e => e.name.toLowerCase() === name.toLowerCase())) {
+          D.exercises.push({id:'e'+Date.now()+Math.random().toString(36).slice(2,6), name, cat, unit});
+          added++;
+        }
+      });
+      save(); renderDatiExList(); renderExList();
+      toast(`${added} esercizi aggiunti (${valid.length - added} già presenti)`);
+    } catch(err) { toast('File JSON non valido'); }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function downloadExTemplate() {
+  const template = {
+    "gambe": [
+      {"name": "Squat con bilanciere", "unit": "kg"},
+      {"name": "Stacco da terra", "unit": "kg"},
+      {"name": "Pistol squat", "unit": "bw"}
+    ],
+    "schiena": [
+      {"name": "Trazioni", "unit": "bw"},
+      {"name": "Rematori manubri", "unit": "kg"}
+    ],
+    "petto": [
+      {"name": "Panca piana", "unit": "kg"}
+    ],
+    "spalle": [
+      {"name": "Military press", "unit": "kg"}
+    ],
+    "core": [
+      {"name": "Plank laterale", "unit": "bw"}
+    ],
+    "full": [
+      {"name": "Burpees", "unit": "bw"}
+    ]
+  };
+  const note = "// Formato supportato: oggetto con categorie come chiavi, array di esercizi come valori.\n// Categorie valide: gambe, schiena, petto, spalle, core, full, cardio, bicipiti, tricipiti\n// unit: 'kg' per esercizi con peso, 'bw' per corpo libero\n// Rimuovi questa riga di commento prima di importare — il JSON non supporta commenti.\n\n";
+  const blob = new Blob([JSON.stringify(template, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'esercizi_template.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('Template scaricato!');
+}
+
+// ---- UTILS ----
+function fmtDate(d) {
+  return new Date(d+'T12:00:00').toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+}
+
+// ---- INIT ----
+load();
+document.getElementById('log-date').value = new Date().toISOString().slice(0,10);
+updateHome();
+
+// Close sheets on overlay click
+document.querySelectorAll('.sheet-overlay').forEach(el=>{
+  el.addEventListener('click', e=>{
+    if(e.target===el) {
+      if (el.id==='sh-add-ex') resetAddExSheet();
+      el.classList.remove('open');
+    }
+  });
+});
+
+// ---- PWA: SERVICE WORKER ----
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ---- INSTALL LOGIC ----
+let deferredPrompt = null;
+const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+// Hide install button if already running as installed app
+if (IS_STANDALONE) {
+  const btn = document.getElementById('install-home-btn');
+  if (btn) btn.style.display = 'none';
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Override the install button to trigger native prompt directly
+  const btn = document.getElementById('install-home-btn');
+  if (btn) {
+    btn.onclick = () => {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(r => {
+        if (r.outcome === 'accepted') {
+          btn.style.display = 'none';
+          toast('App installata! 🎉');
+        }
+        deferredPrompt = null;
+      });
+    };
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('install-home-btn');
+  if (btn) btn.style.display = 'none';
+  toast('App installata! 🎉');
+});
+
+function switchInstallTab(tab) {
+  const isAndroid = tab === 'android';
+  document.getElementById('install-android').style.display = isAndroid ? 'block' : 'none';
+  document.getElementById('install-ios').style.display = isAndroid ? 'none' : 'block';
+  const tabA = document.getElementById('itab-android');
+  const tabI = document.getElementById('itab-ios');
+  tabA.style.border = isAndroid ? '2px solid var(--accent)' : '1px solid var(--border)';
+  tabA.style.background = isAndroid ? 'var(--accent-bg)' : 'transparent';
+  tabA.style.color = isAndroid ? 'var(--accent)' : 'var(--muted)';
+  tabI.style.border = !isAndroid ? '2px solid var(--accent)' : '1px solid var(--border)';
+  tabI.style.background = !isAndroid ? 'var(--accent-bg)' : 'transparent';
+  tabI.style.color = !isAndroid ? 'var(--accent)' : 'var(--muted)';
+}
+
+function copyLink() {
+  navigator.clipboard.writeText('https://t-ivan2.github.io/Workout-Toubkal/')
+    .then(() => toast('Link copiato!'))
+    .catch(() => toast('Copia manualmente il link'));
+}
+
+// ---- BACKUP AUTOMATICO DOMENICA 23:00 ----
+function doBackup() {
+  const blob = new Blob([JSON.stringify({exported: new Date().toISOString(), data: D}, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `workout_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  localStorage.setItem('backup_dismissed_week', getWeekKey());
+  toast('Backup scaricato! ✓');
+}
+
+function getWeekKey() {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return d.getUTCFullYear() + '-W' + Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function checkBackupReminder() {
+  const now = new Date();
+  if (now.getDay() !== 0 || now.getHours() !== 23) return;
+  if (localStorage.getItem('backup_dismissed_week') === getWeekKey()) return;
+  if (!D.workouts.length) return;
+  toast('💾 Domenica sera — ricorda di fare il backup! (Tab Dati → Scarica JSON)');
+}
+checkBackupReminder();
+setInterval(checkBackupReminder, 30 * 60 * 1000);
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</body>
+</html>
