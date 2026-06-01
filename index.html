@@ -1834,9 +1834,9 @@ window.addEventListener('beforeinstallprompt', e => {
   // Show install banner if not dismissed recently
   const dismissed = localStorage.getItem('install_dismissed');
   const dismissedAgo = dismissed ? (Date.now() - parseInt(dismissed)) : Infinity;
-  if (dismissedAgo > 7 * 24 * 3600 * 1000) {
+  //if (dismissedAgo > 7 * 24 * 3600 * 1000) {
     document.getElementById('install-banner').classList.add('show');
-  }
+  //}
 });
 
 function doInstall() {
