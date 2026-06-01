@@ -1,4 +1,4 @@
-const CACHE_NAME = 'workout-toubkal-v1';
+const CACHE_NAME = 'workout-toubkal-v2';
 const ASSETS = [
   '/Workout-Toubkal/',
   '/Workout-Toubkal/index.html',
